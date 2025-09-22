@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Django
+*.sqlite3
+/media
+/static
+
+# Virtual environment
+venv/
+.venv/
+
+# Environment variables
+.env
+
+# IDEs
+.idea/
+.vscode/
+
+# Logs
+*.log
+celerybeat.pid
+
+# npm/yarn/pnpm related files
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.pnpm-store/
+
+# Misc
+*.pot
+*.mo
+.DS_Store
