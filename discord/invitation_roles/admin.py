@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Invite
+from .models import Invite, AccessRole
 
 @admin.register(Invite)
 class InviteAdmin(admin.ModelAdmin):
@@ -7,5 +7,26 @@ class InviteAdmin(admin.ModelAdmin):
     list_filter = ('status', 'created_at')
     search_fields = ('email', 'invite_code', 'member_id')
     readonly_fields = ('created_at', 'used_at')
+
+@admin.register(AccessRole)
+class AccessRoleAdmin(admin.ModelAdmin):
+    list_display = ('name', 'role_id', 'is_active', 'description', 'created_at', 'updated_at')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('name', 'role_id', 'description')
+    readonly_fields = ('created_at', 'updated_at')
+    list_editable = ('is_active',)  # Permite activar/desactivar directamente desde la lista
+    
+    fieldsets = (
+        ('Información del Rol', {
+            'fields': ('name', 'role_id', 'description')
+        }),
+        ('Estado', {
+            'fields': ('is_active',)
+        }),
+        ('Fechas', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)  # Campo colapsable
+        }),
+    )
 
 # Register your models here.

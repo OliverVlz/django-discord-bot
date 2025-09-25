@@ -1,0 +1,18 @@
+{
+    "venvPath": ".",
+    "venv": "venv",
+    "pythonVersion": "3.13", 
+    "pythonPlatform": "Windows",
+    "reportMissingImports": "warning",
+    "reportMissingTypeStubs": "none",
+    "useLibraryCodeForTypes": true,
+    "reportAttributeAccessIssue": "none",
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "venv"
+    ],
+    "extraPaths": [
+        "./discord"
+    ]
+}
