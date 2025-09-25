@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Invite, AccessRole
+from .models import Invite, AccessRole, BotConfiguration
 
 @admin.register(Invite)
 class InviteAdmin(admin.ModelAdmin):
@@ -28,5 +28,29 @@ class AccessRoleAdmin(admin.ModelAdmin):
             'classes': ('collapse',)  # Campo colapsable
         }),
     )
+
+
+@admin.register(BotConfiguration)
+class BotConfigurationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'value', 'configuration_type', 'is_active', 'description', 'updated_at')
+    list_filter = ('configuration_type', 'is_active', 'created_at')
+    search_fields = ('name', 'value', 'description')
+    readonly_fields = ('created_at', 'updated_at')
+    list_editable = ('is_active',)
+    fieldsets = (
+        ('Configuración', {
+            'fields': ('name', 'value', 'configuration_type', 'description')
+        }),
+        ('Estado', {
+            'fields': ('is_active',)
+        }),
+        ('Fechas', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related()
 
 # Register your models here.

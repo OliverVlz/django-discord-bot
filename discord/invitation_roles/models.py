@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from uuid import uuid4
 
 # Create your models here.
@@ -45,3 +46,41 @@ class AccessRole(models.Model):
         ordering = ['name']
         verbose_name = "Rol de Acceso"
         verbose_name_plural = "Roles de Acceso"
+
+
+class BotConfiguration(models.Model):
+    CONFIGURATION_TYPES = [
+        ('guild', 'Guild/Servidor'),
+        ('channel', 'Canal'),
+        ('message', 'Mensaje'),
+        ('category', 'Categoría'),
+        ('general', 'General'),
+    ]
+
+    name = models.CharField(max_length=100, unique=True, help_text="Nombre identificativo de la configuración (ej: 'guild_id', 'rules_channel')")
+    value = models.CharField(max_length=200, help_text="Valor de la configuración (ID de Discord, número, etc.)")
+    configuration_type = models.CharField(max_length=20, choices=CONFIGURATION_TYPES, help_text="Tipo de configuración")
+    description = models.TextField(blank=True, help_text="Descripción de para qué se usa esta configuración")
+    is_active = models.BooleanField(default=True, help_text="Si está activa, el bot la usará")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        # Validar que solo haya una configuración activa por nombre
+        if self.is_active:
+            existing = BotConfiguration.objects.filter(name=self.name, is_active=True).exclude(pk=self.pk)
+            if existing.exists():
+                raise ValidationError(f"Ya existe una configuración activa con el nombre '{self.name}'")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        status = "✅" if self.is_active else "❌"
+        return f"{status} {self.name}: {self.value}"
+
+    class Meta:
+        ordering = ['configuration_type', 'name']
+        verbose_name = "Configuración del Bot"
+        verbose_name_plural = "Configuraciones del Bot"

@@ -20,7 +20,63 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'disc
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'discord.discord.settings') # Corregido
 django.setup()
 
-from invitation_roles.models import Invite, AccessRole
+from invitation_roles.models import Invite, AccessRole, BotConfiguration
+
+# --- Helper Functions ---
+
+async def get_bot_config(name, default=None):
+    """
+    Obtiene una configuración del bot desde la base de datos.
+    Si no existe o no está activa, devuelve el valor por defecto.
+    """
+    try:
+        config = await sync_to_async(
+            lambda: BotConfiguration.objects.filter(name=name, is_active=True).first()
+        )()
+        return config.value if config else default
+    except Exception as e:
+        print(f"Error al obtener configuración '{name}': {e}")
+        return default
+
+async def get_bot_config_int(name, default=None):
+    """
+    Obtiene una configuración del bot como entero.
+    """
+    value = await get_bot_config(name, default)
+    try:
+        return int(value) if value else default
+    except (ValueError, TypeError):
+        print(f"Error al convertir configuración '{name}' a entero: {value}")
+        return default
+
+async def update_bot_config(name, value, description=None):
+    """
+    Actualiza o crea una configuración del bot en la base de datos.
+    """
+    try:
+        config, created = await sync_to_async(
+            lambda: BotConfiguration.objects.get_or_create(
+                name=name,
+                defaults={
+                    'value': str(value),
+                    'configuration_type': 'message' if 'message' in name else 'channel',
+                    'description': description or f'Configuración para {name}',
+                    'is_active': True
+                }
+            )
+        )()
+        
+        if not created:
+            config.value = str(value)
+            if description:
+                config.description = description
+            await sync_to_async(config.save)()
+            
+        print(f"✅ Configuración {'creada' if created else 'actualizada'}: {name} = {value}")
+        return True
+    except Exception as e:
+        print(f"Error al actualizar configuración '{name}': {e}")
+        return False
 
 class AcceptRulesView(View):
     def __init__(self):
@@ -63,7 +119,7 @@ class AcceptRulesView(View):
                 await member.add_roles(role)
                 
                 # Mensaje de interacción completo con toda la información
-                presentation_channel_id = os.environ.get('PRESENTATION_CHANNEL_ID')
+                presentation_channel_id = await get_bot_config('presentation_channel_id')
                 presentation_mention = f"<#{presentation_channel_id}>" if presentation_channel_id else "canal de presentaciones"
                 
                 welcome_message = f"""🎉 ¡Felicidades! Has aceptado las reglas de la Comunidad IMAX y ahora tienes acceso a los canales.
@@ -184,8 +240,8 @@ async def on_ready():
     await populate_guild_invites()
 
     # Configurar el mensaje de aceptación de reglas con botón
-    rule_channel_id = os.environ.get('RULES_CHANNEL_ID')
-    rule_message_id = os.environ.get('RULES_MESSAGE_ID') # Nuevo: ID del mensaje de reglas
+    rule_channel_id = await get_bot_config('rules_channel_id')
+    rule_message_id = await get_bot_config('rules_message_id')
     rules_text = """
 ## Reglas de la Comunidad IMAX :scroll:
 
@@ -211,7 +267,7 @@ async def on_ready():
     """
 
     if not rule_channel_id:
-        print("RULES_CHANNEL_ID no está configurado en las variables de entorno. No se puede configurar el mensaje de reglas.")
+        print("rules_channel_id no está configurado en la base de datos. No se puede configurar el mensaje de reglas.")
         return
 
     try:
@@ -221,30 +277,126 @@ async def on_ready():
             return
 
         view = AcceptRulesView()
+        rules_message = None
         
         if rule_message_id:
             try:
-                message = await rules_channel.fetch_message(int(rule_message_id))
-                await message.edit(content=rules_text, view=view)
+                rules_message = await rules_channel.fetch_message(int(rule_message_id))
+                await rules_message.edit(content=rules_text, view=view)
                 print(f"Mensaje de reglas actualizado en el canal {rules_channel.name}.")
             except (discord.NotFound, discord.Forbidden): # Capturar Forbidden también
                 print(f"Mensaje de reglas con ID {rule_message_id} no encontrado o no se pudo editar. Enviando uno nuevo.")
-                message = await rules_channel.send(content=rules_text, view=view)
-                print(f"Nuevo mensaje de reglas enviado. Por favor, actualiza RULES_MESSAGE_ID en tu .env con el ID: {message.id}")
+                rules_message = await rules_channel.send(content=rules_text, view=view)
+                await update_bot_config('rules_message_id', rules_message.id, 'ID del mensaje de reglas con el botón de aceptación')
+                print(f"Nuevo mensaje de reglas enviado y configuración actualizada automáticamente: {rules_message.id}")
                 
         else:
-            message = await rules_channel.send(content=rules_text, view=view)
-            print(f"Mensaje de reglas enviado por primera vez. Por favor, añade RULES_MESSAGE_ID a tu .env con el ID: {message.id}")
+            rules_message = await rules_channel.send(content=rules_text, view=view)
+            await update_bot_config('rules_message_id', rules_message.id, 'ID del mensaje de reglas con el botón de aceptación')
+            print(f"Mensaje de reglas enviado por primera vez y configuración creada automáticamente: {rules_message.id}")
+        
+        # Verificar si el mensaje de reglas está fijado
+        if rules_message:
+            if rules_message.pinned:
+                print(f"✅ El mensaje de reglas está fijado correctamente.")
+            else:
+                try:
+                    await rules_message.pin()
+                    print(f"📌 Mensaje de reglas fijado automáticamente.")
+                except discord.Forbidden:
+                    print(f"⚠️ No se pudo fijar el mensaje de reglas. El bot necesita permisos de 'Gestionar mensajes'.")
+                except discord.HTTPException as e:
+                    if e.code == 30003:  # Cannot execute action on this channel type
+                        print(f"⚠️ No se pueden fijar mensajes en este tipo de canal.")
+                    else:
+                        print(f"⚠️ Error al fijar mensaje de reglas: {e}")
             
         bot.add_view(view) # Añadir la vista al bot para que persista
 
     except Exception as e:
         print(f"Error al configurar el mensaje de reglas: {e}")
 
+    # Configurar mensaje fijado en el canal de presentate
+    await setup_presentation_channel_message()
+
+async def setup_presentation_channel_message():
+    """Configura un mensaje fijado en el canal de presentaciones"""
+    presentation_channel_id = await get_bot_config('presentation_channel_id')
+    presentation_message_id = await get_bot_config('presentation_message_id')
+    
+    if not presentation_channel_id:
+        print("presentation_channel_id no está configurado en la base de datos. No se puede configurar el mensaje de presentaciones.")
+        return
+
+    try:
+        presentation_channel = bot.get_channel(int(presentation_channel_id))
+        if not presentation_channel:
+            print(f"Canal de presentaciones con ID {presentation_channel_id} no encontrado.")
+            return
+
+        presentation_text = """
+🌟 **¡Bienvenido al canal de presentaciones de IMAX!** 🦷✨
+
+¡Nos alegra mucho tenerte aquí! Este es el lugar perfecto para que te presentes ante la comunidad.
+
+**¿Cómo presentarte?** 📝
+• Comparte tu nombre o como te gusta que te llamen
+• Cuéntanos de dónde eres
+• ¿Qué te motivó a unirte a IMAX?
+• ¿En qué nivel de odontología te encuentras?
+• Comparte algo interesante sobre ti
+
+**Consejos para una buena presentación:** 💡
+✅ Sé auténtico y genuino
+✅ Mantén un tono respetuoso y profesional
+✅ No dudes en hacer preguntas sobre la comunidad
+✅ ¡Siéntete libre de agregar emojis para darle vida a tu mensaje!
+
+**Recuerda:** Este es un espacio seguro donde todos estamos aquí para aprender y crecer juntos. ¡Tu experiencia y perspectiva enriquecen nuestra comunidad!
+
+¡Esperamos conocerte mejor! 🚀
+        """
+
+        presentation_message = None
+        
+        if presentation_message_id:
+            try:
+                presentation_message = await presentation_channel.fetch_message(int(presentation_message_id))
+                await presentation_message.edit(content=presentation_text)
+                print(f"Mensaje de presentaciones actualizado en el canal {presentation_channel.name}.")
+            except (discord.NotFound, discord.Forbidden):
+                print(f"Mensaje de presentaciones con ID {presentation_message_id} no encontrado o no se pudo editar. Enviando uno nuevo.")
+                presentation_message = await presentation_channel.send(content=presentation_text)
+                await update_bot_config('presentation_message_id', presentation_message.id, 'ID del mensaje fijado en el canal de presentaciones')
+                print(f"Nuevo mensaje de presentaciones enviado y configuración actualizada automáticamente: {presentation_message.id}")
+        else:
+            presentation_message = await presentation_channel.send(content=presentation_text)
+            await update_bot_config('presentation_message_id', presentation_message.id, 'ID del mensaje fijado en el canal de presentaciones')
+            print(f"Mensaje de presentaciones enviado por primera vez y configuración creada automáticamente: {presentation_message.id}")
+
+        # Verificar si el mensaje está fijado y fijarlo si no lo está
+        if presentation_message:
+            if presentation_message.pinned:
+                print(f"✅ El mensaje de presentaciones está fijado correctamente.")
+            else:
+                try:
+                    await presentation_message.pin()
+                    print(f"📌 Mensaje de presentaciones fijado automáticamente.")
+                except discord.Forbidden:
+                    print(f"⚠️ No se pudo fijar el mensaje de presentaciones. El bot necesita permisos de 'Gestionar mensajes'.")
+                except discord.HTTPException as e:
+                    if e.code == 30003:  # Cannot execute action on this channel type
+                        print(f"⚠️ No se pueden fijar mensajes en este tipo de canal.")
+                    else:
+                        print(f"⚠️ Error al fijar mensaje de presentaciones: {e}")
+
+    except Exception as e:
+        print(f"Error al configurar el mensaje de presentaciones: {e}")
+
 async def populate_guild_invites():
-    guild_id = os.environ.get('GUILD_ID')
+    guild_id = await get_bot_config('guild_id')
     if not guild_id:
-        print("GUILD_ID no está configurado en las variables de entorno.")
+        print("guild_id no está configurado en la base de datos.")
         return
     
     guild = bot.get_guild(int(guild_id))
@@ -316,7 +468,7 @@ async def on_member_join(member):
                         used_code = code
                         print(f"Debug (on_member_join): Invite {code} estaba en el cache antiguo pero no en el nuevo (probablemente usado y eliminado).")
                         break
-                
+                        
             # Actualizar el cache GLOBAL de forma protegida
             with invite_cache_lock:
                 invite_cache[guild_id] = new_invite_uses
@@ -346,18 +498,18 @@ async def on_member_join(member):
         # Actualizar la entrada de la invitación para marcarla como pendiente de verificación
         invite_entry.status = 'PENDING_VERIFICATION'
         invite_entry.member_id = str(member.id)
-        invite_entry.rule_message_id = os.environ.get('RULES_MESSAGE_ID') # Usar RULES_MESSAGE_ID
-        invite_entry.rule_channel_id = os.environ.get('RULES_CHANNEL_ID') # Usar RULES_CHANNEL_ID
+        invite_entry.rule_message_id = await get_bot_config('rules_message_id')
+        invite_entry.rule_channel_id = await get_bot_config('rules_channel_id')
         await sync_to_async(invite_entry.save)()
         print(f"Invite {used_code} marcado como PENDING_VERIFICATION para miembro {member.name}.")
         
         # Enviar mensaje de bienvenida personalizado en el canal por defecto
-        default_channel_id = os.environ.get('DEFAULT_CHANNEL_ID')
+        default_channel_id = await get_bot_config('default_channel_id')
         if default_channel_id:
             try:
                 welcome_channel = bot.get_channel(int(default_channel_id))
                 if welcome_channel:
-                    rules_channel_id = os.environ.get('RULES_CHANNEL_ID')
+                    rules_channel_id = await get_bot_config('rules_channel_id')
                     rules_mention = f"<#{rules_channel_id}>" if rules_channel_id else "canal de reglas"
                     welcome_message = await welcome_channel.send(f"🎉 ¡Bienvenido {member.mention} a la Comunidad IMAX! Para acceder a todos los canales, por favor dirígete a {rules_mention} y haz clic en el botón **'Acepto las Reglas'**.")
                     
