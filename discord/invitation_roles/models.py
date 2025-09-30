@@ -66,7 +66,6 @@ class BotConfiguration(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def clean(self):
-        # Validar que solo haya una configuración activa por nombre
         if self.is_active:
             existing = BotConfiguration.objects.filter(name=self.name, is_active=True).exclude(pk=self.pk)
             if existing.exists():
@@ -84,3 +83,117 @@ class BotConfiguration(models.Model):
         ordering = ['configuration_type', 'name']
         verbose_name = "Configuración del Bot"
         verbose_name_plural = "Configuraciones del Bot"
+
+
+class HotmartProduct(models.Model):
+    product_id = models.CharField(max_length=100, unique=True, db_index=True, help_text="ID del producto en Hotmart")
+    product_name = models.CharField(max_length=255, help_text="Nombre del producto")
+    discord_role_id = models.CharField(max_length=100, help_text="ID del rol de Discord a asignar")
+    is_subscription = models.BooleanField(default=True, help_text="Si es un producto de suscripción recurrente")
+    is_active = models.BooleanField(default=True, help_text="Si el producto está activo")
+    priority = models.IntegerField(default=0, help_text="Prioridad del producto (mayor = mejor plan)")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        status = "✅" if self.is_active else "❌"
+        tipo = "Suscripción" if self.is_subscription else "Pago único"
+        return f"{status} {self.product_name} ({tipo}) - Prioridad: {self.priority}"
+
+    class Meta:
+        ordering = ['-priority', 'product_name']
+        verbose_name = "Producto Hotmart"
+        verbose_name_plural = "Productos Hotmart"
+
+
+class HotmartSubscription(models.Model):
+    SUBSCRIPTION_STATUS_CHOICES = [
+        ('ACTIVE', 'Activa'),
+        ('CANCELLED', 'Cancelada'),
+        ('SUSPENDED', 'Suspendida'),
+        ('EXPIRED', 'Expirada'),
+        ('PENDING_PAYMENT', 'Pendiente de Pago'),
+    ]
+
+    subscriber_code = models.CharField(max_length=100, unique=True, db_index=True, help_text="Código único del suscriptor en Hotmart")
+    email = models.EmailField(max_length=255, db_index=True, help_text="Email del suscriptor")
+    product = models.ForeignKey(HotmartProduct, on_delete=models.CASCADE, related_name='subscriptions')
+    plan_id = models.CharField(max_length=100, help_text="ID del plan de suscripción")
+    plan_name = models.CharField(max_length=255, help_text="Nombre del plan")
+    
+    status = models.CharField(max_length=20, choices=SUBSCRIPTION_STATUS_CHOICES, default='ACTIVE')
+    
+    member_id = models.CharField(max_length=100, null=True, blank=True, db_index=True, help_text="ID del miembro en Discord")
+    current_role_id = models.CharField(max_length=100, null=True, blank=True, help_text="Rol actual asignado")
+    
+    next_charge_date = models.DateTimeField(null=True, blank=True, help_text="Fecha del próximo cobro")
+    cancellation_date = models.DateTimeField(null=True, blank=True, help_text="Fecha de cancelación")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_sync_at = models.DateTimeField(null=True, blank=True, help_text="Última sincronización con Discord")
+
+    def __str__(self):
+        return f"{self.email} - {self.product.product_name} ({self.status})"
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Suscripción Hotmart"
+        verbose_name_plural = "Suscripciones Hotmart"
+        indexes = [
+            models.Index(fields=['email', 'status']),
+            models.Index(fields=['subscriber_code', 'status']),
+        ]
+
+
+class HotmartTransaction(models.Model):
+    TRANSACTION_STATUS_CHOICES = [
+        ('APPROVED', 'Aprobada'),
+        ('COMPLETED', 'Completada'),
+        ('REFUNDED', 'Reembolsada'),
+        ('DISPUTE', 'Disputa'),
+        ('CANCELLED', 'Cancelada'),
+        ('PENDING', 'Pendiente'),
+    ]
+
+    EVENT_TYPE_CHOICES = [
+        ('PURCHASE_APPROVED', 'Compra Aprobada'),
+        ('PURCHASE_COMPLETE', 'Compra Completada'),
+        ('PURCHASE_REFUNDED', 'Compra Reembolsada'),
+        ('PURCHASE_PROTEST', 'Disputa de Compra'),
+        ('SUBSCRIPTION_CANCELLATION', 'Cancelación de Suscripción'),
+        ('SWITCH_PLAN', 'Cambio de Plan'),
+        ('UPDATE_SUBSCRIPTION_CHARGE_DATE', 'Actualización de Fecha de Cobro'),
+    ]
+
+    transaction_id = models.CharField(max_length=100, unique=True, db_index=True, help_text="ID único de la transacción")
+    hotmart_event_id = models.CharField(max_length=100, unique=True, db_index=True, help_text="ID del evento de Hotmart")
+    event_type = models.CharField(max_length=50, choices=EVENT_TYPE_CHOICES, help_text="Tipo de evento de Hotmart")
+    
+    email = models.EmailField(max_length=255, db_index=True)
+    subscription = models.ForeignKey(HotmartSubscription, on_delete=models.SET_NULL, null=True, blank=True, related_name='transactions')
+    product = models.ForeignKey(HotmartProduct, on_delete=models.SET_NULL, null=True, blank=True, related_name='transactions')
+    
+    status = models.CharField(max_length=20, choices=TRANSACTION_STATUS_CHOICES)
+    transaction_value = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    currency = models.CharField(max_length=10, default='BRL')
+    
+    raw_webhook_data = models.JSONField(help_text="Datos completos del webhook de Hotmart")
+    
+    processed = models.BooleanField(default=False, help_text="Si la transacción fue procesada correctamente")
+    processed_at = models.DateTimeField(null=True, blank=True)
+    error_message = models.TextField(blank=True, help_text="Mensaje de error si el procesamiento falló")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.event_type} - {self.email} ({self.status})"
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Transacción Hotmart"
+        verbose_name_plural = "Transacciones Hotmart"
+        indexes = [
+            models.Index(fields=['email', 'processed']),
+            models.Index(fields=['event_type', 'created_at']),
+        ]

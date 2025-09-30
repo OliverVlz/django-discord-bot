@@ -5,4 +5,5 @@ app_name = 'invitation_roles'
 
 urlpatterns = [
     path('generate-invite/', views.generate_invite_api, name='generate_invite_api'),
+    path('hotmart/webhook/', views.hotmart_webhook, name='hotmart_webhook'),
 ]
