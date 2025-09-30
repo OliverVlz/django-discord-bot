@@ -316,8 +316,9 @@ async def on_ready():
     except Exception as e:
         print(f"Error al configurar el mensaje de reglas: {e}")
 
-    # Configurar mensaje fijado en el canal de presentate
+    # Configurar mensajes fijados en canales
     await setup_presentation_channel_message()
+    await setup_welcome_channel_message()
 
 async def setup_presentation_channel_message():
     """Configura un mensaje fijado en el canal de presentaciones"""
@@ -337,24 +338,23 @@ async def setup_presentation_channel_message():
         presentation_text = """
 🌟 **¡Bienvenido al canal de presentaciones de IMAX!** 🦷✨
 
-¡Nos alegra mucho tenerte aquí! Este es el lugar perfecto para que te presentes ante la comunidad.
+Este es el primer paso real en IMAX Universe.  
+Cuéntanos brevemente quién eres, desde dónde te conectas y qué esperas conseguir con tu formación en implantología.
 
-**¿Cómo presentarte?** 📝
-• Comparte tu nombre o como te gusta que te llamen
-• Cuéntanos de dónde eres
-• ¿Qué te motivó a unirte a IMAX?
-• ¿En qué nivel de odontología te encuentras?
-• Comparte algo interesante sobre ti
+**Puedes usar esta guía si lo necesitas:**
 
-**Consejos para una buena presentación:** 💡
-✅ Sé auténtico y genuino
-✅ Mantén un tono respetuoso y profesional
-✅ No dudes en hacer preguntas sobre la comunidad
-✅ ¡Siéntete libre de agregar emojis para darle vida a tu mensaje!
+1. **Nombre y ciudad:**
+2. **¿A qué te dedicas hoy en tu clínica?**
+3. **¿Qué nivel IMAX estás cursando?**
+4. **¿Qué te gustaría lograr como implantólogo?**
+5. **Algo curioso o divertido sobre ti** 😄
 
-**Recuerda:** Este es un espacio seguro donde todos estamos aquí para aprender y crecer juntos. ¡Tu experiencia y perspectiva enriquecen nuestra comunidad!
+💥 **YO TE RECOMIENDO HACERLO EN VIDEO, ES SUPER IMPORTANTE PONERNOS TODOS CARA Y EMPEZAR A EXPONERNOS.** Adelante, grábate un video de máximo 1 minuto y preséntate tal y como eres. (No tengas miedo a que nadie te juzgue o al que dirán, aquí eso no existe).
 
-¡Esperamos conocerte mejor! 🚀
+---
+
+💥 **Este espacio no es solo para compartir... ¡es para conectar!**
+Aquí es donde comienza tu red de apoyo, compañeros y crecimiento.
         """
 
         presentation_message = None
@@ -392,6 +392,85 @@ async def setup_presentation_channel_message():
 
     except Exception as e:
         print(f"Error al configurar el mensaje de presentaciones: {e}")
+
+async def setup_welcome_channel_message():
+    """Configura un mensaje fijado en el canal de bienvenida"""
+    welcome_channel_id = await get_bot_config('welcome_channel_id')
+    welcome_message_id = await get_bot_config('welcome_message_id')
+    
+    if not welcome_channel_id:
+        print("welcome_channel_id no está configurado en la base de datos. No se puede configurar el mensaje de bienvenida.")
+        return
+
+    try:
+        welcome_channel = bot.get_channel(int(welcome_channel_id))
+        if not welcome_channel:
+            print(f"Canal de bienvenida con ID {welcome_channel_id} no encontrado.")
+            return
+
+        welcome_text = """
+👋 **BIENVENIDO A IMAX UNIVERSE**
+
+Este servidor es tu centro de entrenamiento, mentalidad y comunidad para crecer como implantólogo.
+
+🔍 **¿QUÉ DEBES HACER AHORA?**
+✅ 1. Lee las y ACEPTA las 📜 reglas-del-servidor
+✅ 2. Preséntate en 🙋 presentate-aquí → Queremos conocerte
+✅ 3. Accede a tu nivel (Launch, Base, Starts, etc.) y participa
+✅ 4. Visita los canales generales:
+🔥 mentalidad-ganadora
+🧘‍♂️ habitos-diarios
+💼 marca-personal-imax
+
+🎁 Si tienes bonus, ve a 🎁 bonus-y-descargables
+
+📢 Para novedades importantes, mira siempre 📢 anuncios-generales
+
+---
+
+🎓 **¿A QUÉ TIENES ACCESO?**
+Tu nivel actual → Participar
+Niveles inferiores → Apoyar y guiar
+Niveles superiores → Solo ver (modo inspiración)
+
+👑 ¡Bienvenido al universo IMAX! Aquí empieza tu transformación.
+        """
+
+        welcome_message = None
+        
+        if welcome_message_id:
+            try:
+                welcome_message = await welcome_channel.fetch_message(int(welcome_message_id))
+                await welcome_message.edit(content=welcome_text)
+                print(f"Mensaje de bienvenida actualizado en el canal {welcome_channel.name}.")
+            except (discord.NotFound, discord.Forbidden):
+                print(f"Mensaje de bienvenida con ID {welcome_message_id} no encontrado o no se pudo editar. Enviando uno nuevo.")
+                welcome_message = await welcome_channel.send(content=welcome_text)
+                await update_bot_config('welcome_message_id', welcome_message.id, 'ID del mensaje fijado en el canal de bienvenida')
+                print(f"Nuevo mensaje de bienvenida enviado y configuración actualizada automáticamente: {welcome_message.id}")
+        else:
+            welcome_message = await welcome_channel.send(content=welcome_text)
+            await update_bot_config('welcome_message_id', welcome_message.id, 'ID del mensaje fijado en el canal de bienvenida')
+            print(f"Mensaje de bienvenida enviado por primera vez y configuración creada automáticamente: {welcome_message.id}")
+
+        # Verificar si el mensaje está fijado y fijarlo si no lo está
+        if welcome_message:
+            if welcome_message.pinned:
+                print(f"✅ El mensaje de bienvenida está fijado correctamente.")
+            else:
+                try:
+                    await welcome_message.pin()
+                    print(f"📌 Mensaje de bienvenida fijado automáticamente.")
+                except discord.Forbidden:
+                    print(f"⚠️ No se pudo fijar el mensaje de bienvenida. El bot necesita permisos de 'Gestionar mensajes'.")
+                except discord.HTTPException as e:
+                    if e.code == 30003:  # Cannot execute action on this channel type
+                        print(f"⚠️ No se pueden fijar mensajes en este tipo de canal.")
+                    else:
+                        print(f"⚠️ Error al fijar mensaje de bienvenida: {e}")
+
+    except Exception as e:
+        print(f"Error al configurar el mensaje de bienvenida: {e}")
 
 async def populate_guild_invites():
     guild_id = await get_bot_config('guild_id')
@@ -503,11 +582,11 @@ async def on_member_join(member):
         await sync_to_async(invite_entry.save)()
         print(f"Invite {used_code} marcado como PENDING_VERIFICATION para miembro {member.name}.")
         
-        # Enviar mensaje de bienvenida personalizado en el canal por defecto
-        default_channel_id = await get_bot_config('default_channel_id')
-        if default_channel_id:
+        # Enviar mensaje de bienvenida personalizado en el canal de bienvenida
+        welcome_channel_id = await get_bot_config('welcome_channel_id')
+        if welcome_channel_id:
             try:
-                welcome_channel = bot.get_channel(int(default_channel_id))
+                welcome_channel = bot.get_channel(int(welcome_channel_id))
                 if welcome_channel:
                     rules_channel_id = await get_bot_config('rules_channel_id')
                     rules_mention = f"<#{rules_channel_id}>" if rules_channel_id else "canal de reglas"
@@ -523,11 +602,11 @@ async def on_member_join(member):
                     
                     asyncio.create_task(delete_after_delay())
                 else:
-                    print(f"Canal de bienvenida con ID {default_channel_id} no encontrado.")
+                    print(f"Canal de bienvenida con ID {welcome_channel_id} no encontrado.")
             except Exception as e:
                 print(f"Error al enviar mensaje de bienvenida: {e}")
         else:
-            print("DEFAULT_CHANNEL_ID no está configurado en las variables de entorno.")
+            print("welcome_channel_id no está configurado en la base de datos.")
 
     except Invite.DoesNotExist:
         print(f"Invite {used_code} no encontrado en la base de datos de Django.")
