@@ -5,12 +5,12 @@ from .models import Invite, BotConfiguration, HotmartProduct, HotmartSubscriptio
 from datetime import datetime, timedelta
 import os
 import json
-import resend
+import smtplib
+import ssl
 import requests
+from email.message import EmailMessage
 from uuid import uuid4
 from decimal import Decimal
-
-resend.api_key = os.environ.get("RESEND_API_KEY")
 
 # Helper functions para obtener configuraciones de la base de datos
 def get_bot_config(name, default=None):
@@ -25,6 +25,7 @@ def get_bot_config(name, default=None):
         print(f"Error al obtener configuración '{name}': {e}")
         return default
 
+
 def get_bot_config_int(name, default=None):
     """
     Obtiene una configuración del bot como entero.
@@ -35,6 +36,32 @@ def get_bot_config_int(name, default=None):
     except (ValueError, TypeError):
         print(f"Error al convertir configuración '{name}' a entero: {value}")
         return default
+
+
+def send_email_message(to_email, subject, html_body, plain_body):
+    """Envía un correo usando Gmail (SMTP + app password)."""
+    sender_email = os.environ.get("GMAIL_ADDRESS")
+    app_password = os.environ.get("GMAIL_APP_PASSWORD")
+
+    if not sender_email or not app_password:
+        raise RuntimeError("GMAIL_ADDRESS o GMAIL_APP_PASSWORD no están configurados.")
+
+    recipients = [to_email] if isinstance(to_email, str) else list(to_email)
+    if not recipients:
+        raise ValueError("Debe proporcionarse al menos un destinatario.")
+
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = sender_email
+    msg["To"] = ", ".join(recipients)
+    msg.set_content(plain_body or "")
+    if html_body:
+        msg.add_alternative(html_body, subtype="html")
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as smtp:
+        smtp.login(sender_email, app_password)
+        smtp.send_message(msg)
 
 # Las configuraciones ahora se leen desde la base de datos (excepto tokens sensibles)
 # DISCORD_BOT_TOKEN se mantiene en variables de entorno por seguridad
@@ -116,19 +143,27 @@ def generate_invite_api(request):
             )
             print(f"Debug: Invite real creado: code={invite_code} para {email}")
 
-        # Enviar correo electrónico con Resend
+        # Enviar correo electronico
         try:
-            email_response = resend.Emails.send({
-                "from": "Acme <onboarding@resend.dev>", # Reemplaza con tu dominio verificado
-                "to": [email],
-                "subject": "Tu invitación a nuestro servidor de Discord",
-                "html": f"<strong>¡Hola!</strong><br><br>Has solicitado unirte a nuestro servidor de Discord. Aquí tienes tu enlace de invitación único:<br><a href=\"{invite_url}\">{invite_url}</a><br><br>Este enlace es de un solo uso y te asignará el rol correcto automáticamente.<br><br>¡Te esperamos!",
-            })
-            print(f"Correo enviado con Resend: {email_response}")
+            subject = "Tu invitacion a nuestro servidor de Discord"
+            plain_body = (
+                "Hola!\n\n"
+                "Has solicitado unirte a nuestro servidor de Discord. "
+                f"Aqui tienes tu enlace de invitacion unico: {invite_url}\n\n"
+                "Este enlace es de un solo uso y te asignara el rol correcto automaticamente.\n\n"
+                "Te esperamos!"
+            )
+            html_body = (
+                f'<strong>Hola!</strong><br><br>Has solicitado unirte a nuestro servidor de Discord. ' 
+                f'Aqui tienes tu enlace de invitacion unico:<br><a href="{invite_url}">{invite_url}</a><br><br>'
+                'Este enlace es de un solo uso y te asignara el rol correcto automaticamente.<br><br>'
+                'Te esperamos!'
+            )
+            send_email_message(email, subject, html_body, plain_body)
+            print(f"Correo de invitacion enviado a {email}")
 
         except Exception as email_error:
-            print(f"Error al enviar el correo con Resend: {email_error}")
-            # No devolvemos un 500 aquí para no bloquear el flujo si el email es el problema de Resend
+            print(f"Error al enviar el correo: {email_error}")
             return JsonResponse({'message': 'Invite generado, pero error al enviar el correo.', 'error': str(email_error), 'inviteUrl': invite_url}, status=200)
 
         return JsonResponse({'message': 'Invite generado y correo enviado exitosamente.', 'inviteUrl': invite_url}, status=200)
@@ -632,9 +667,10 @@ def process_charge_date_update(event_id, transaction_id, email, subscriber_code,
 def send_discord_invite_email(email, product, subscription=None):
     try:
         role_id = product.discord_role_id
-        
+
+        invite_url = ""
         existing_invite = Invite.objects.filter(email=email, status='PENDING').order_by('-created_at').first()
-        
+
         if existing_invite:
             if existing_invite.expires_at and datetime.now(existing_invite.expires_at.tzinfo) < existing_invite.expires_at:
                 invite_url = f"https://discord.gg/{existing_invite.invite_code}"
@@ -687,20 +723,28 @@ def send_discord_invite_email(email, product, subscription=None):
             )
             print(f"✅ Invite creado: {invite_code} para {email}")
         
-        email_response = resend.Emails.send({
-            "from": "Acme <onboarding@resend.dev>",
-            "to": [email],
-            "subject": f"¡Bienvenido a {product.product_name}! - Acceso a Discord",
-            "html": f"""
-            <h2>¡Hola!</h2>
-            <p>Tu compra de <strong>{product.product_name}</strong> ha sido aprobada exitosamente.</p>
-            <p>Aquí tienes tu enlace de invitación único a nuestro servidor de Discord:</p>
-            <p><a href="{invite_url}" style="background-color: #5865F2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">Unirme al Servidor de Discord</a></p>
-            <p>Este enlace es de un solo uso y te asignará automáticamente los permisos correctos.</p>
-            <p>¡Te esperamos en la comunidad!</p>
-            """,
-        })
-        print(f"✅ Correo de invitación enviado a {email}")
+        if not invite_url:
+            print('No se pudo generar un enlace de invitacion valido.')
+            return False
+
+        subject = f"Bienvenido a {product.product_name}! - Acceso a Discord"
+        plain_body = (
+            "Hola!\n\n"
+            f"Tu compra de {product.product_name} ha sido aprobada exitosamente.\n\n"
+            f"Aqui tienes tu enlace de invitacion unico a nuestro servidor de Discord: {invite_url}\n\n"
+            "Este enlace es de un solo uso y te asignara automaticamente los permisos correctos.\n\n"
+            "Te esperamos en la comunidad!"
+        )
+        html_body = (
+            f'<h2>Hola!</h2>'
+            f'<p>Tu compra de <strong>{product.product_name}</strong> ha sido aprobada exitosamente.</p>'
+            f'<p>Aqui tienes tu enlace de invitacion unico a nuestro servidor de Discord:</p>'
+            f'<p><a href="{invite_url}" style="background-color: #5865F2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">Unirme al Servidor de Discord</a></p>'
+            '<p>Este enlace es de un solo uso y te asignara automaticamente los permisos correctos.</p>'
+            '<p>Te esperamos en la comunidad!</p>'
+        )
+        send_email_message(email, subject, html_body, plain_body)
+        print(f"Correo de invitacion enviado a {email}")
         return True
         
     except Exception as e:

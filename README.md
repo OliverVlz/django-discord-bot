@@ -71,8 +71,13 @@ POSTGRES_USER='postgres'
 POSTGRES_PASSWORD='postgres'
 POSTGRES_HOST='localhost'
 POSTGRES_PORT='5432'
+
+# Credenciales SMTP de Gmail (usa App Password)
+GMAIL_ADDRESS='tu-correo@gmail.com'
+GMAIL_APP_PASSWORD='tu-app-password-16-caracteres'
 ```
 
+> Para Gmail necesitas habilitar la verificacion en dos pasos y generar una contraseña de aplicacion; este valor va en `GMAIL_APP_PASSWORD`.
 
 ### 6. Aplicar Migraciones
 
