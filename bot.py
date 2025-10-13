@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'disc
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'discord.discord.settings') # Corregido
 django.setup()
 
-from invitation_roles.models import Invite, AccessRole, BotConfiguration
+from invitation_roles.models import Invite, AccessRole, BotConfiguration, HotmartSubscription
 
 # --- Helper Functions ---
 
@@ -77,6 +77,30 @@ async def update_bot_config(name, value, description=None):
     except Exception as e:
         print(f"Error al actualizar configuración '{name}': {e}")
         return False
+
+
+async def bind_subscription_to_member(email: str, member_id: int, role_id: int):
+    if not email:
+        return
+
+    def _update():
+        subscription = (
+            HotmartSubscription.objects
+            .filter(email=email)
+            .order_by('-updated_at')
+            .first()
+        )
+        if not subscription:
+            return
+
+        subscription.member_id = str(member_id)
+        subscription.current_role_id = str(role_id)
+        subscription.last_sync_at = timezone.now()
+        subscription.save(update_fields=['member_id', 'current_role_id', 'last_sync_at'])
+        print(f"? Suscripción {subscription.subscriber_code} ligada a miembro {member_id} con rol {role_id}")
+
+    await sync_to_async(_update)()
+
 
 class AcceptRulesView(View):
     def __init__(self):
@@ -135,6 +159,7 @@ class AcceptRulesView(View):
                 invite_entry.status = 'USED'
                 invite_entry.used_at = timezone.now()
                 await sync_to_async(invite_entry.save)()
+                await bind_subscription_to_member(invite_entry.email, interaction.user.id, role_id_str)
                 print(f"Invite para {member.name} marcado como USED después de verificación.")
             else:
                 await interaction.followup.send(f"Error: El rol con ID {role_id_str} no se encontró en el servidor.", ephemeral=True)

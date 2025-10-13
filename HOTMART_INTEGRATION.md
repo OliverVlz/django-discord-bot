@@ -1,5 +1,16 @@
 # 🚀 Integración Hotmart - Discord Bot
 
+  1. Configura visitor_role_id en BotConfiguration con el rol base que quieres otorgar tras la baja.
+  2. Verifica que DISCORD_BOT_TOKEN y guild_id siguen vigentes, pues ahora se usan para llamadas REST
+  directas.
+  3. Prueba completa:
+      - Webhook PURCHASE_APPROVED de un usuario con member_id en BD debe reactivar rol sin generar
+  invite.
+      - Webhook SUBSCRIPTION_CANCELLATION debe quitar el rol premium y, si configuraste
+  visitor_role_id, añadir el rol visitante.
+      - Cambiar de plan (via SWITCH_PLAN) debe reemplazar el rol anterior sin intervención manual.
+      - Usuarios sin member_id seguirán recibiendo correo con enlace.
+      
 ## 📋 Índice
 
 1. [Descripción General](#descripción-general)
@@ -279,6 +290,40 @@ else:
 
 ---
 
+### Mapeo de datos desde Hotmart
+
+Para mitigar errores se normalizan los payloads documentados en `hotmart.md`. Las respuestas 1-5 cubren `PURCHASE_APPROVED`, `PURCHASE_COMPLETE`, `PURCHASE_REFUNDED`, `SUBSCRIPTION_CANCELLATION`, `SWITCH_PLAN` y `UPDATE_SUBSCRIPTION_CHARGE_DATE`.
+
+**Identificadores de producto evaluados (en orden):**
+- `product.id` y `product.ucode` del payload principal.
+- `product.content.products[].id` y `product.content.products[].ucode` cuando Hotmart agrupa varios subproductos.
+- `subscription.product.id` y `subscription.plan.id`/`plan.name` para eventos ligados a suscripciones.
+- `purchase.offer.code`, `purchase.offer.coupon_code` y `purchase.sckPaymentLink` para ventas con ofertas o payment links.
+
+Se busca el primer valor activo en `HotmartProduct.product_id`. El origen queda trazado en logs (por ejemplo: `Producto Plan VIP mapeado usando subscription.plan.id=654321`).
+
+**Normalización de estados de transacción:**
+
+| Hotmart | Estado almacenado | Evento que lo usa |
+| --- | --- | --- |
+| `APPROVED`, `PAID` | `APPROVED` | `PURCHASE_APPROVED` |
+| `COMPLETED` | `COMPLETED` | `PURCHASE_COMPLETE` |
+| `REFUNDED`, `CHARGEBACK` | `REFUNDED` | `PURCHASE_REFUNDED` |
+| `CANCELLED`, `CANCELED` | `CANCELLED` | `PURCHASE_REFUNDED` / cancelaciones manuales |
+| `UNDER_ANALYSIS`, `IN_DISPUTE` | `DISPUTE` | `PURCHASE_PROTEST` |
+| `WAITING_PAYMENT`, `PENDING_PAYMENT` | `PENDING` | registro informativo |
+
+Cualquier estado no reconocido se persiste como `PENDING` para facilitar auditorías sin romper los choices del modelo.
+
+**Fallbacks controlados:**
+- Eventos sin `email` se registran con `unknown@hotmart.local` pero no disparan accesos.
+- Si llega un webhook sin `subscriber_code`, se responde con error lógico y la transacción queda marcada como `processed=False`.
+- Cuando el producto no está configurado se guardan los identificadores recibidos para depuración.
+- Al quedar una suscripción en estado `CANCELLED`, `REFUNDED` o `SUSPENDED` se quita el rol premium y, si existe `visitor_role_id` en `BotConfiguration`, se asigna automáticamente el rol visitante.
+- Si el usuario vuelve a pagar y la suscripción tiene `member_id` registrado, el rol premium se reasigna vía API sin necesidad de consumir un nuevo enlace; sólo se envía invitación cuando no se logra sincronizar el rol automáticamente.
+
+Con estas reglas, los cinco payloads de ejemplo se procesan sin errores y quedan mapeados a los modelos `HotmartProduct`, `HotmartSubscription` y `HotmartTransaction`.
+
 ## ⚙️ Configuración
 
 ### 1. Variables de Entorno
@@ -315,6 +360,7 @@ BotConfiguration.objects.create(
 - `welcome_channel_id` → Canal donde se envían invites
 - `rules_channel_id` → Canal de reglas
 - `invite_ttl_seconds` → Tiempo de vida del invite (default: 604800 = 7 días)
+- `visitor_role_id` → (Opcional) Rol base que se asignará cuando una suscripción quede cancelada o expirada
 
 ### 3. Productos en Hotmart
 
