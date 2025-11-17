@@ -21,6 +21,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'discord.discord.settings') # Co
 django.setup()
 
 from invitation_roles.models import Invite, AccessRole, BotConfiguration, HotmartSubscription
+from chatbot_ai.discord_commands import setup as setup_chatbot
 
 # --- Helper Functions ---
 
@@ -249,9 +250,10 @@ class AcceptRulesView(View):
 # --- Lógica del Bot de Discord ---
 
 intents = discord.Intents.default()
-intents.members = True # Necesario para guildMemberAdd
+intents.members = True
 intents.guilds = True
 intents.invites = True
+intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
@@ -263,6 +265,10 @@ discord_api_semaphore = asyncio.Semaphore(3)  # Máximo 3 llamadas simultáneas 
 async def on_ready():
     print(f'Bot listo como {bot.user}!')
     await populate_guild_invites()
+    
+    # Configurar chatbot
+    await setup_chatbot(bot)
+    print('✅ Chatbot de IA configurado correctamente')
 
     # Configurar el mensaje de aceptación de reglas con botón
     rule_channel_id = await get_bot_config('rules_channel_id')

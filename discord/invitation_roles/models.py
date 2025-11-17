@@ -55,10 +55,11 @@ class BotConfiguration(models.Model):
         ('message', 'Mensaje'),
         ('category', 'Categoría'),
         ('general', 'General'),
+        ('api_key', 'API Key'),
     ]
 
     name = models.CharField(max_length=100, unique=True, help_text="Nombre identificativo de la configuración (ej: 'guild_id', 'rules_channel')")
-    value = models.CharField(max_length=200, blank=True, help_text="Valor de la configuración (ID de Discord, número, etc.)")
+    value = models.TextField(blank=True, help_text="Valor de la configuración (ID de Discord, número, API key, etc.)")
     configuration_type = models.CharField(max_length=20, choices=CONFIGURATION_TYPES, help_text="Tipo de configuración")
     description = models.TextField(blank=True, help_text="Descripción de para qué se usa esta configuración")
     is_active = models.BooleanField(default=True, help_text="Si está activa, el bot la usará")

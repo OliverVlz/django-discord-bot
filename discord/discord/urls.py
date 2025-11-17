@@ -16,8 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
+
+def redirect_to_admin(request):
+    """Redirige la URL raíz al admin de Django"""
+    return redirect('/admin/')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('invitation_roles.urls')),
+    path('', redirect_to_admin, name='home'),
+    path('invitation_roles/', include('invitation_roles.urls')),
 ]

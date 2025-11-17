@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'invitation_roles',
+    'chatbot_ai',
 ]
 
 MIDDLEWARE = [
