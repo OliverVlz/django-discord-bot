@@ -1,9 +1,87 @@
 import discord
 import asyncio
 from discord.ext import commands
+from discord.ui import Button, View
 from asgiref.sync import sync_to_async
 from .chatbot_service import chatbot_service
 from .models import ChatbotSession, ChatbotRole, ChatbotTraining
+
+class StartChatbotView(View):
+    """Vista con botón para iniciar chat con IA"""
+    
+    def __init__(self, cog):
+        super().__init__(timeout=None)
+        self.cog = cog
+    
+    @discord.ui.button(label="💬 Iniciar Chat con IA", style=discord.ButtonStyle.primary, custom_id="start_chatbot_button")
+    async def start_chat_button(self, interaction: discord.Interaction, button: Button):
+        await interaction.response.defer(ephemeral=True)
+        
+        try:
+            user_id = str(interaction.user.id)
+            username = interaction.user.display_name
+            
+            guild = interaction.guild
+            if not guild:
+                await interaction.followup.send("❌ Error: No se pudo encontrar el servidor.", ephemeral=True)
+                return
+            
+            member = guild.get_member(interaction.user.id)
+            if not member:
+                await interaction.followup.send("❌ Error: No se pudo encontrar tu información en el servidor.", ephemeral=True)
+                return
+            
+            user_role_id = await self.cog._get_user_role_id(member)
+            if not user_role_id:
+                await interaction.followup.send("❌ No se pudo determinar tu rol. Contacta a un administrador.", ephemeral=True)
+                return
+            
+            can_use, error_msg = await self.cog.chatbot_service.can_user_use_chatbot(user_id, user_role_id)
+            if not can_use:
+                await interaction.followup.send(error_msg, ephemeral=True)
+                return
+            
+            try:
+                dm_channel = await interaction.user.create_dm()
+                
+                welcome_embed = discord.Embed(
+                    title="🤖 Chat con IA de IMAX",
+                    description="**Especializado en Odontología y Comunidad IMAX**\n\n¡Hola! Soy tu asistente de IA. Puedes hacer cualquier pregunta sobre odontología y te ayudaré.\n\n**Simplemente escribe tu pregunta aquí** y te responderé de inmediato.",
+                    color=0x00ff00
+                )
+                
+                welcome_embed.add_field(
+                    name="📝 Ejemplos de preguntas",
+                    value="• ¿Cómo hago una restauración?\n• ¿Qué composite recomiendas?\n• ¿Técnicas de endodoncia?\n• ¿Mejores prácticas en odontología?",
+                    inline=False
+                )
+                
+                welcome_embed.add_field(
+                    name="🎭 Tu límite",
+                    value=f"Usa `!ai_stats` en el servidor para ver tu uso diario y mensual.",
+                    inline=False
+                )
+                
+                welcome_embed.add_field(
+                    name="⚠️ Importante",
+                    value="• No reemplaza consulta profesional\n• Siempre consulta con tu dentista\n• Respeta las reglas del servidor",
+                    inline=False
+                )
+                
+                welcome_embed.set_footer(text="💡 Escribe tu pregunta cuando estés listo")
+                
+                await dm_channel.send(embed=welcome_embed)
+                await interaction.followup.send("✅ ¡Chat iniciado! Revisa tus mensajes privados (DMs).", ephemeral=True)
+                
+            except discord.Forbidden:
+                await interaction.followup.send("❌ No puedo enviarte mensajes privados. Por favor, habilita los DMs del bot en Discord y vuelve a intentar.", ephemeral=True)
+            except Exception as e:
+                print(f"Error iniciando chat por DM: {e}")
+                await interaction.followup.send("❌ Error al iniciar el chat. Por favor, inténtalo de nuevo.", ephemeral=True)
+                
+        except Exception as e:
+            print(f"Error en botón de iniciar chat: {e}")
+            await interaction.followup.send("❌ Error al procesar tu solicitud. Por favor, inténtalo de nuevo.", ephemeral=True)
 
 class ChatbotCog(commands.Cog):
     """Comandos del chatbot de IA"""
@@ -11,6 +89,7 @@ class ChatbotCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.chatbot_service = chatbot_service
+        self.chatbot_view = StartChatbotView(self)
     
     @commands.Cog.listener()
     async def on_ready(self):
@@ -19,21 +98,21 @@ class ChatbotCog(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, message):
-        """Escucha mensajes en canales de chatbot"""
+        """Escucha mensajes en DMs del bot"""
         # Ignorar mensajes del bot
         if message.author.bot:
             return
         
-        # Verificar si es un canal de chatbot
-        if not await self._is_chatbot_channel(message.channel):
+        # Solo procesar mensajes en DMs (no en canales del servidor)
+        if not isinstance(message.channel, discord.DMChannel):
             return
         
         # Ignorar comandos (empiezan con !)
         if message.content.startswith('!'):
             return
         
-        # Procesar mensaje del chatbot
-        await self._process_chatbot_message(message)
+        # Procesar mensaje del chatbot en DM
+        await self._process_dm_message(message)
     
     async def _is_chatbot_channel(self, channel) -> bool:
         """Verifica si el canal es un canal de chatbot"""
@@ -44,6 +123,83 @@ class ChatbotCog(commands.Cog):
             
         except Exception:
             return False
+    
+    async def _process_dm_message(self, message):
+        """Procesa un mensaje del chatbot recibido por DM"""
+        try:
+            user_id = str(message.author.id)
+            username = message.author.display_name
+            channel_id = f"dm_{user_id}"
+            
+            # Obtener el servidor configurado
+            guild_id = await self._get_bot_config('guild_id')
+            if not guild_id:
+                await message.channel.send("❌ Error: No se ha configurado el servidor. Contacta a un administrador.")
+                return
+            
+            guild = self.bot.get_guild(int(guild_id))
+            if not guild:
+                await message.channel.send("❌ Error: No se pudo encontrar el servidor. Contacta a un administrador.")
+                return
+            
+            # Intentar obtener el miembro (primero del cache, luego fetch)
+            member = guild.get_member(message.author.id)
+            if not member:
+                try:
+                    member = await guild.fetch_member(message.author.id)
+                except discord.NotFound:
+                    await message.channel.send("❌ No se pudo encontrar tu información en el servidor. Asegúrate de estar en el servidor de IMAX.")
+                    return
+                except Exception as e:
+                    print(f"Error obteniendo miembro: {e}")
+                    await message.channel.send("❌ Error obteniendo tu información del servidor. Por favor, inténtalo de nuevo.")
+                    return
+            
+            # Obtener rol del usuario
+            user_role_id = await self._get_user_role_id(member)
+            if not user_role_id:
+                await message.channel.send("❌ No se pudo determinar tu rol. Contacta a un administrador.")
+                return
+            
+            # Verificar permisos
+            can_use, error_msg = await self.chatbot_service.can_user_use_chatbot(user_id, user_role_id)
+            if not can_use:
+                await message.channel.send(error_msg)
+                return
+            
+            # Mostrar que está procesando
+            processing_msg = await message.channel.send("🤖 Procesando tu mensaje...")
+            
+            # Crear o obtener sesión (usando channel_id especial para DMs)
+            session = await self.chatbot_service.create_or_get_session(
+                user_id, username, channel_id, user_role_id
+            )
+            
+            # Procesar mensaje
+            ai_response, success = await self.chatbot_service.process_message(
+                session, message.content, str(message.id)
+            )
+            
+            # Enviar respuesta
+            embed = discord.Embed(
+                title="🤖 Asistente IA",
+                description=ai_response,
+                color=0x00ff00 if success else 0xff0000
+            )
+            
+            embed.set_footer(
+                text=f"Respondiendo a {username}",
+                icon_url=message.author.avatar.url if message.author.avatar else None
+            )
+            
+            await processing_msg.edit(content=None, embed=embed)
+            
+        except Exception as e:
+            print(f"Error procesando mensaje del chatbot en DM: {e}")
+            try:
+                await message.channel.send("❌ Error procesando tu mensaje. Por favor, inténtalo de nuevo.")
+            except:
+                pass
     
     async def _process_chatbot_message(self, message):
         """Procesa un mensaje del chatbot"""
@@ -64,8 +220,8 @@ class ChatbotCog(commands.Cog):
                 await message.reply(error_msg)
                 return
             
-            # Mostrar que está procesando
-            processing_msg = await message.reply("🤖 Procesando tu mensaje...")
+            # Mostrar que está procesando en el canal
+            processing_msg = await message.reply("🤖 Procesando tu mensaje... Te enviaré la respuesta por DM.")
             
             # Crear o obtener sesión
             session = await self.chatbot_service.create_or_get_session(
@@ -77,25 +233,51 @@ class ChatbotCog(commands.Cog):
                 session, message.content, str(message.id)
             )
             
-            # Actualizar mensaje con respuesta
-            embed = discord.Embed(
-                title="🤖 Asistente IA",
-                description=ai_response,
-                color=0x00ff00 if success else 0xff0000
-            )
-            
-            embed.set_footer(
-                text=f"Respondiendo a {username}",
-                icon_url=message.author.avatar.url if message.author.avatar else None
-            )
-            
-            await processing_msg.edit(content=None, embed=embed)
-            
-            # Agregar reacciones para feedback
-            if success:
-                await message.add_reaction("✅")
-            else:
-                await message.add_reaction("❌")
+            # Intentar enviar respuesta por DM
+            try:
+                embed = discord.Embed(
+                    title="🤖 Asistente IA",
+                    description=ai_response,
+                    color=0x00ff00 if success else 0xff0000
+                )
+                
+                embed.set_footer(
+                    text=f"Respondiendo a {username}",
+                    icon_url=message.author.avatar.url if message.author.avatar else None
+                )
+                
+                dm_channel = await message.author.create_dm()
+                await dm_channel.send(embed=embed)
+                
+                # Actualizar mensaje en el canal indicando que se envió por DM
+                await processing_msg.edit(content="✅ Respuesta enviada por mensaje privado. Revisa tus DMs.")
+                
+                # Agregar reacciones para feedback
+                if success:
+                    await message.add_reaction("✅")
+                else:
+                    await message.add_reaction("❌")
+                    
+            except discord.Forbidden:
+                # Si no se pueden enviar DMs, enviar en el canal
+                await processing_msg.edit(content="⚠️ No puedo enviarte DMs. Habilitando respuestas públicas temporalmente.")
+                embed = discord.Embed(
+                    title="🤖 Asistente IA",
+                    description=ai_response,
+                    color=0x00ff00 if success else 0xff0000
+                )
+                embed.set_footer(
+                    text=f"Respondiendo a {username}",
+                    icon_url=message.author.avatar.url if message.author.avatar else None
+                )
+                await processing_msg.edit(content=None, embed=embed)
+                if success:
+                    await message.add_reaction("✅")
+                else:
+                    await message.add_reaction("❌")
+            except Exception as e:
+                print(f"Error enviando DM: {e}")
+                await processing_msg.edit(content="❌ Error enviando respuesta. Por favor, habilita DMs del bot e inténtalo de nuevo.")
             
             # Enviar mensaje de bienvenida si es la primera vez del usuario en este canal
             await self._send_welcome_message_if_needed(message, session)
@@ -172,27 +354,42 @@ class ChatbotCog(commands.Cog):
                 print(f"Canal del chatbot no encontrado: {chatbot_channel_id}")
                 return
             
-            # Verificar si ya hay mensajes fijos del bot
+            # Verificar si ya hay mensajes fijos del bot con el botón
             pinned_messages = await channel.pins()
-            bot_pinned_exists = any(
-                msg.author.id == self.bot.user.id and 
-                "Chatbot IA - Información" in msg.embeds[0].title if msg.embeds else False
-                for msg in pinned_messages
-            )
+            bot_pinned_with_button = None
+            for msg in pinned_messages:
+                if msg.author.id == self.bot.user.id:
+                    if msg.embeds and "Chatbot IA - Información" in msg.embeds[0].title:
+                        if msg.components:
+                            bot_pinned_with_button = msg
+                            break
             
-            if bot_pinned_exists:
-                return  # Ya existe mensaje fijo del bot
+            if bot_pinned_with_button:
+                print(f"✅ Mensaje fijo con botón ya existe en canal: {channel.name}")
+                return
+            
+            # Si existe mensaje fijo sin botón, eliminarlo
+            for msg in pinned_messages:
+                if msg.author.id == self.bot.user.id:
+                    if msg.embeds and "Chatbot IA - Información" in msg.embeds[0].title:
+                        if not msg.components:
+                            try:
+                                await msg.unpin()
+                                await msg.delete()
+                                print(f"🗑️ Mensaje fijo antiguo eliminado (sin botón)")
+                            except Exception as e:
+                                print(f"⚠️ Error eliminando mensaje antiguo: {e}")
             
             # Crear embed de información
             info_embed = discord.Embed(
                 title="🤖 Chatbot IA - Información",
-                description="**Especializado en Odontología y Comunidad IMAX**",
+                description="**Especializado en Odontología y Comunidad IMAX**\n\nHaz clic en el botón de abajo para iniciar un chat privado con la IA.",
                 color=0x00ff00
             )
             
             info_embed.add_field(
-                name="📝 Uso Rápido",
-                value="**Solo escribe tu pregunta** y el bot responderá automáticamente.\n\n**Ejemplos:**\n• \"¿Cómo hago una restauración?\"\n• \"¿Qué composite recomiendas?\"\n• \"¿Técnicas de endodoncia?\"",
+                name="💬 Cómo usar",
+                value="1. Haz clic en el botón **\"💬 Iniciar Chat con IA\"**\n2. Revisa tus mensajes privados (DMs)\n3. Escribe tu pregunta en el chat privado\n4. La IA te responderá de forma privada",
                 inline=False
             )
             
@@ -214,10 +411,10 @@ class ChatbotCog(commands.Cog):
                 inline=False
             )
             
-            info_embed.set_footer(text="💡 Para ayuda completa usa: !ai_help")
+            info_embed.set_footer(text="💡 Tu conversación será completamente privada")
             
-            # Enviar mensaje y fijarlo
-            pinned_msg = await channel.send(embed=info_embed)
+            # Enviar mensaje con botón y fijarlo
+            pinned_msg = await channel.send(embed=info_embed, view=self.chatbot_view)
             await pinned_msg.pin()
             
             print(f"✅ Mensaje fijo enviado en canal del chatbot: {channel.name}")
@@ -380,18 +577,29 @@ class ChatbotCog(commands.Cog):
     @commands.command(name='ai_pin')
     @commands.has_permissions(administrator=True)
     async def ai_pin(self, ctx):
-        """Envía y fija un mensaje de información del chatbot (solo admins)"""
+        """Envía y fija un mensaje de información del chatbot con botón (solo admins)"""
         try:
+            # Eliminar mensajes fijos antiguos del bot en este canal
+            pinned_messages = await ctx.channel.pins()
+            for msg in pinned_messages:
+                if msg.author.id == self.bot.user.id:
+                    if msg.embeds and "Chatbot IA - Información" in msg.embeds[0].title:
+                        try:
+                            await msg.unpin()
+                            await msg.delete()
+                        except Exception as e:
+                            print(f"⚠️ Error eliminando mensaje antiguo: {e}")
+            
             # Crear embed de información
             info_embed = discord.Embed(
                 title="🤖 Chatbot IA - Información",
-                description="**Especializado en Odontología y Comunidad IMAX**",
+                description="**Especializado en Odontología y Comunidad IMAX**\n\nHaz clic en el botón de abajo para iniciar un chat privado con la IA.",
                 color=0x00ff00
             )
             
             info_embed.add_field(
-                name="📝 Uso Rápido",
-                value="**Solo escribe tu pregunta** y el bot responderá automáticamente.\n\n**Ejemplos:**\n• \"¿Cómo hago una restauración?\"\n• \"¿Qué composite recomiendas?\"\n• \"¿Técnicas de endodoncia?\"",
+                name="💬 Cómo usar",
+                value="1. Haz clic en el botón **\"💬 Iniciar Chat con IA\"**\n2. Revisa tus mensajes privados (DMs)\n3. Escribe tu pregunta en el chat privado\n4. La IA te responderá de forma privada",
                 inline=False
             )
             
@@ -413,16 +621,18 @@ class ChatbotCog(commands.Cog):
                 inline=False
             )
             
-            info_embed.set_footer(text="💡 Para ayuda completa usa: !ai_help")
+            info_embed.set_footer(text="💡 Tu conversación será completamente privada")
             
-            # Enviar mensaje y fijarlo
-            pinned_msg = await ctx.send(embed=info_embed)
+            # Enviar mensaje con botón y fijarlo
+            pinned_msg = await ctx.send(embed=info_embed, view=self.chatbot_view)
             await pinned_msg.pin()
             
-            await ctx.reply("✅ Mensaje de información enviado y fijado correctamente")
+            await ctx.reply("✅ Mensaje de información con botón enviado y fijado correctamente")
             
         except Exception as e:
             print(f"Error enviando mensaje fijo: {e}")
+            import traceback
+            traceback.print_exc()
             await ctx.reply("❌ Error enviando mensaje fijo")
 
     @commands.command(name='ai_cleanup')
@@ -469,4 +679,6 @@ class ChatbotCog(commands.Cog):
 
 async def setup(bot):
     """Configura el cog del chatbot"""
-    await bot.add_cog(ChatbotCog(bot))
+    cog = ChatbotCog(bot)
+    await bot.add_cog(cog)
+    bot.add_view(cog.chatbot_view)
