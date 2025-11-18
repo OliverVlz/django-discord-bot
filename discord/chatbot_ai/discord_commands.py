@@ -184,7 +184,7 @@ class ChatbotCog(commands.Cog):
             embed = discord.Embed(
                 title="🤖 Asistente IA",
                 description=ai_response,
-                color=0x00ff00 if success else 0xff0000
+                color=0xffffff if success else 0xff0000
             )
             
             embed.set_footer(
@@ -238,7 +238,7 @@ class ChatbotCog(commands.Cog):
                 embed = discord.Embed(
                     title="🤖 Asistente IA",
                     description=ai_response,
-                    color=0x00ff00 if success else 0xff0000
+                    color=0xffffff if success else 0xff0000
                 )
                 
                 embed.set_footer(
@@ -264,7 +264,7 @@ class ChatbotCog(commands.Cog):
                 embed = discord.Embed(
                     title="🤖 Asistente IA",
                     description=ai_response,
-                    color=0x00ff00 if success else 0xff0000
+                    color=0xffffff if success else 0xff0000
                 )
                 embed.set_footer(
                     text=f"Respondiendo a {username}",
