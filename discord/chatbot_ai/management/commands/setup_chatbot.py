@@ -9,7 +9,7 @@ class Command(BaseCommand):
     help = 'Configura el chatbot de IA con configuraciones básicas'
 
     def handle(self, *args, **options):
-        self.stdout.write("🚀 Configurando Chatbot de IA para Discord...")
+        self.stdout.write("Configurando Chatbot de IA para Discord...")
         self.stdout.write("=" * 50)
         
         try:
@@ -20,32 +20,33 @@ class Command(BaseCommand):
             
             self.stdout.write("=" * 50)
             self.stdout.write(
-                self.style.SUCCESS("✅ Configuración completada!")
+                self.style.SUCCESS("Configuracion completada!")
             )
             self.stdout.write("")
-            self.stdout.write("📋 Próximos pasos:")
-            self.stdout.write("1. Configurar variables de entorno:")
-            self.stdout.write("   - OPENAI_API_KEY o GEMINI_API_KEY")
-            self.stdout.write("   - AI_PROVIDER (openai o gemini)")
+            self.stdout.write("Proximos pasos:")
+            self.stdout.write("1. Configurar API keys en Django Admin:")
+            self.stdout.write("   - openai_api_key: API Key de OpenAI (sk-...)")
+            self.stdout.write("   - gemini_api_key: API Key de Gemini (AIza...)")
+            self.stdout.write("   - ai_provider: Proveedor a usar (openai o gemini)")
             self.stdout.write("")
             self.stdout.write("2. Actualizar configuraciones en el admin de Django:")
-            self.stdout.write("   - chatbot_channel_id: ID del canal donde funcionará el bot")
+            self.stdout.write("   - chatbot_channel_id: ID del canal donde funcionara el bot")
             self.stdout.write("   - default_chatbot_role_id: Rol por defecto")
             self.stdout.write("")
             self.stdout.write("3. Configurar roles en el admin:")
             self.stdout.write("   - Editar IDs de roles reales de tu servidor")
-            self.stdout.write("   - Ajustar límites según necesidades")
+            self.stdout.write("   - Ajustar limites segun necesidades")
             self.stdout.write("")
             self.stdout.write("4. Reiniciar el bot de Discord")
             
         except Exception as e:
             self.stdout.write(
-                self.style.ERROR(f"❌ Error durante la configuración: {e}")
+                self.style.ERROR(f"Error durante la configuracion: {e}")
             )
 
     def setup_bot_configurations(self):
         """Configura las configuraciones básicas del bot"""
-        self.stdout.write("🔧 Configurando configuraciones del bot...")
+        self.stdout.write("Configurando configuraciones del bot...")
         
         configs = [
             {
@@ -86,13 +87,13 @@ class Command(BaseCommand):
                 defaults=config_data
             )
             if created:
-                self.stdout.write(f"✅ Configuración creada: {config_data['name']}")
+                self.stdout.write(f"Configuracion creada: {config_data['name']}")
             else:
-                self.stdout.write(f"ℹ️ Configuración ya existe: {config_data['name']}")
+                self.stdout.write(f"Configuracion ya existe: {config_data['name']}")
 
     def setup_chatbot_roles(self):
         """Configura roles básicos para el chatbot"""
-        self.stdout.write("🎭 Configurando roles del chatbot...")
+        self.stdout.write("Configurando roles del chatbot...")
         
         # Ejemplo de roles - ajustar según tu servidor
         roles = [
@@ -128,13 +129,13 @@ class Command(BaseCommand):
                 defaults=role_data
             )
             if created:
-                self.stdout.write(f"✅ Rol creado: {role_data['role_name']}")
+                self.stdout.write(f"Rol creado: {role_data['role_name']}")
             else:
-                self.stdout.write(f"ℹ️ Rol ya existe: {role_data['role_name']}")
+                self.stdout.write(f"Rol ya existe: {role_data['role_name']}")
 
     def setup_system_prompt(self):
         """Configura el prompt del sistema"""
-        self.stdout.write("🤖 Configurando prompt del sistema...")
+        self.stdout.write("Configurando prompt del sistema...")
         
         system_prompt = """Eres un asistente de IA especializado en odontología y la comunidad IMAX. 
 
@@ -176,9 +177,9 @@ ESPECIALIDADES:
         )
         
         if created:
-            self.stdout.write("✅ Prompt del sistema configurado")
+            self.stdout.write("Prompt del sistema configurado")
         else:
-            self.stdout.write("ℹ️ Prompt del sistema ya existe")
+            self.stdout.write("Prompt del sistema ya existe")
 
     def setup_training_examples(self):
         """Configura ejemplos de entrenamiento"""
@@ -236,6 +237,6 @@ Reglas de la comunidad:
                 defaults=example
             )
             if created:
-                self.stdout.write(f"✅ Entrenamiento creado: {example['name']}")
+                self.stdout.write(f"Entrenamiento creado: {example['name']}")
             else:
-                self.stdout.write(f"ℹ️ Entrenamiento ya existe: {example['name']}")
+                self.stdout.write(f"Entrenamiento ya existe: {example['name']}")

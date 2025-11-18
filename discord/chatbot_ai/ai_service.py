@@ -67,25 +67,35 @@ RESPUESTAS:
 - Mantén un tono profesional pero accesible"""
 
     async def _get_config_value(self, name: str, default: str | None = None) -> str:
-        """Obtiene un valor de configuración"""
+        """Obtiene un valor de configuración desde ChatbotConfiguration"""
         try:
-            from invitation_roles.models import BotConfiguration
             config = await sync_to_async(
+                lambda: ChatbotConfiguration.objects.filter(name=name, is_active=True).first()
+            )()
+            if config:
+                return config.value
+            from invitation_roles.models import BotConfiguration
+            bot_config = await sync_to_async(
                 lambda: BotConfiguration.objects.filter(name=name, is_active=True).first()
             )()
-            return config.value if config else (default or "")
+            return bot_config.value if bot_config else (default or "")
         except Exception:
             return default or ""
     
     async def _get_api_key_from_config(self, provider: str) -> str:
-        """Obtiene la API key desde la configuración de la base de datos"""
+        """Obtiene la API key desde ChatbotConfiguration"""
         try:
-            from invitation_roles.models import BotConfiguration
             config_name = f"{provider}_api_key"
             config = await sync_to_async(
+                lambda: ChatbotConfiguration.objects.filter(name=config_name, is_active=True).first()
+            )()
+            if config:
+                return config.value
+            from invitation_roles.models import BotConfiguration
+            bot_config = await sync_to_async(
                 lambda: BotConfiguration.objects.filter(name=config_name, is_active=True).first()
             )()
-            return config.value if config else ""
+            return bot_config.value if bot_config else ""
         except Exception:
             return ""
     
@@ -175,9 +185,12 @@ RESPUESTAS:
     
     async def _call_openai(self, messages: List[Dict]) -> Tuple[str, int]:
         """Llama a la API de OpenAI"""
-        api_key = self.openai_api_key or await self._get_api_key_from_config('openai')
+        api_key = await self._get_api_key_from_config('openai') or self.openai_api_key
         if not api_key:
-            raise ValueError("OpenAI API key no configurada")
+            raise ValueError("OpenAI API key no configurada. Configúrala en Django Admin (openai_api_key) o en .env (OPENAI_API_KEY)")
+        
+        model_name = await self._get_config_value('openai_model', 'gpt-4o-mini')
+        print(f"🔍 Usando modelo OpenAI: {model_name}")
         
         headers = {
             "Authorization": f"Bearer {api_key}",
@@ -185,7 +198,7 @@ RESPUESTAS:
         }
         
         data = {
-            "model": "gpt-4",
+            "model": model_name,
             "messages": messages,
             "max_tokens": 1000,
             "temperature": 0.7,
@@ -224,9 +237,9 @@ RESPUESTAS:
     
     async def _call_gemini(self, messages: List[Dict]) -> Tuple[str, int]:
         """Llama a la API de Google Gemini"""
-        api_key = self.gemini_api_key or await self._get_api_key_from_config('gemini')
+        api_key = await self._get_api_key_from_config('gemini') or self.gemini_api_key
         if not api_key:
-            raise ValueError("Gemini API key no configurada")
+            raise ValueError("Gemini API key no configurada. Configúrala en Django Admin (gemini_api_key) o en .env (GEMINI_API_KEY)")
         
         model_name = await self._get_config_value('gemini_model', 'gemini-2.5-flash')
         api_version = await self._get_config_value('gemini_api_version', 'v1')

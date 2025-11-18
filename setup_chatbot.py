@@ -10,8 +10,10 @@ import django
 
 # Configurar Django
 current_dir = os.path.dirname(os.path.abspath(__file__))
+discord_dir = os.path.join(current_dir, 'discord')
+sys.path.insert(0, discord_dir)
 sys.path.insert(0, current_dir)
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'discord.discord.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'discord.settings')
 
 # Cambiar al directorio correcto
 os.chdir(current_dir)
@@ -24,7 +26,7 @@ from chatbot_ai.models import (
 
 def setup_bot_configurations():
     """Configura las configuraciones básicas del bot"""
-    print("🔧 Configurando configuraciones del bot...")
+    print("Configurando configuraciones del bot...")
     
     configs = [
         {
@@ -38,12 +40,6 @@ def setup_bot_configurations():
             'value': '',  # Se debe configurar manualmente
             'configuration_type': 'general',
             'description': 'ID del rol por defecto para usuarios sin rol específico'
-        },
-        {
-            'name': 'ai_provider',
-            'value': 'openai',
-            'configuration_type': 'general',
-            'description': 'Proveedor de IA (openai, anthropic)'
         }
     ]
     
@@ -53,13 +49,60 @@ def setup_bot_configurations():
             defaults=config_data
         )
         if created:
-            print(f"✅ Configuración creada: {config_data['name']}")
+            print(f"Configuracion creada: {config_data['name']}")
         else:
-            print(f"ℹ️ Configuración ya existe: {config_data['name']}")
+            print(f"Configuracion ya existe: {config_data['name']}")
+
+def setup_chatbot_configurations():
+    """Configura las configuraciones específicas del chatbot en ChatbotConfiguration"""
+    print("Configurando configuraciones del chatbot...")
+    
+    configs = [
+        {
+            'name': 'openai_api_key',
+            'value': '',
+            'description': 'API Key de OpenAI (sk-...) - Configurar en Django Admin'
+        },
+        {
+            'name': 'gemini_api_key',
+            'value': '',
+            'description': 'API Key de Google Gemini (AIza...) - Configurar en Django Admin'
+        },
+        {
+            'name': 'ai_provider',
+            'value': 'openai',
+            'description': 'Proveedor de IA (openai, gemini)'
+        },
+        {
+            'name': 'openai_model',
+            'value': 'gpt-4o-mini',
+            'description': 'Modelo de OpenAI a usar (gpt-4o-mini, gpt-4o, etc.)'
+        },
+        {
+            'name': 'gemini_model',
+            'value': 'gemini-2.5-flash',
+            'description': 'Modelo de Gemini a usar (gemini-2.5-flash, gemini-2.0-flash, etc.)'
+        },
+        {
+            'name': 'gemini_api_version',
+            'value': 'v1',
+            'description': 'Version de la API de Gemini (v1, v1beta)'
+        }
+    ]
+    
+    for config_data in configs:
+        config, created = ChatbotConfiguration.objects.get_or_create(
+            name=config_data['name'],
+            defaults=config_data
+        )
+        if created:
+            print(f"Configuracion chatbot creada: {config_data['name']}")
+        else:
+            print(f"Configuracion chatbot ya existe: {config_data['name']}")
 
 def setup_chatbot_roles():
     """Configura roles básicos para el chatbot"""
-    print("🎭 Configurando roles del chatbot...")
+    print("Configurando roles del chatbot...")
     
     # Ejemplo de roles - ajustar según tu servidor
     roles = [
@@ -95,13 +138,13 @@ def setup_chatbot_roles():
             defaults=role_data
         )
         if created:
-            print(f"✅ Rol creado: {role_data['role_name']}")
+            print(f"Rol creado: {role_data['role_name']}")
         else:
-            print(f"ℹ️ Rol ya existe: {role_data['role_name']}")
+            print(f"Rol ya existe: {role_data['role_name']}")
 
 def setup_system_prompt():
     """Configura el prompt del sistema"""
-    print("🤖 Configurando prompt del sistema...")
+    print("Configurando prompt del sistema...")
     
     system_prompt = """Eres un asistente de IA especializado en odontología y la comunidad IMAX. 
 
@@ -133,23 +176,22 @@ ESPECIALIDADES:
 - Prevención y cuidado oral
 - Tecnología dental moderna"""
     
-    config, created = BotConfiguration.objects.get_or_create(
+    config, created = ChatbotConfiguration.objects.get_or_create(
         name='system_prompt',
         defaults={
             'value': system_prompt,
-            'configuration_type': 'general',
             'description': 'Prompt del sistema para el chatbot de IA'
         }
     )
     
     if created:
-        print("✅ Prompt del sistema configurado")
+        print("Prompt del sistema configurado")
     else:
-        print("ℹ️ Prompt del sistema ya existe")
+        print("Prompt del sistema ya existe")
 
 def setup_training_examples():
     """Configura ejemplos de entrenamiento"""
-    print("📚 Configurando ejemplos de entrenamiento...")
+    print("Configurando ejemplos de entrenamiento...")
     
     examples = [
         {
@@ -203,17 +245,20 @@ Reglas de la comunidad:
             defaults=example
         )
         if created:
-            print(f"✅ Entrenamiento creado: {example['name']}")
+            print(f"Entrenamiento creado: {example['name']}")
         else:
-            print(f"ℹ️ Entrenamiento ya existe: {example['name']}")
+            print(f"Entrenamiento ya existe: {example['name']}")
 
 def main():
     """Función principal"""
-    print("🚀 Configurando Chatbot de IA para Discord...")
+    print("Configurando Chatbot de IA para Discord...")
     print("=" * 50)
     
     try:
         setup_bot_configurations()
+        print()
+        
+        setup_chatbot_configurations()
         print()
         
         setup_chatbot_roles()
@@ -226,15 +271,17 @@ def main():
         print()
         
         print("=" * 50)
-        print("✅ Configuración completada!")
+        print("Configuracion completada!")
         print()
-        print("📋 Próximos pasos:")
-        print("1. Configurar variables de entorno:")
-        print("   - OPENAI_API_KEY o ANTHROPIC_API_KEY")
-        print("   - AI_PROVIDER (openai o anthropic)")
+        print("Proximos pasos:")
+        print("1. Configurar API keys en Django Admin:")
+        print("   - Ve a Django Admin -> Chatbot_Ai -> Configuraciones Chatbot")
+        print("   - Edita 'openai_api_key' y pon tu API key de OpenAI (sk-...)")
+        print("   - Edita 'gemini_api_key' y pon tu API key de Gemini (AIza...)")
+        print("   - Edita 'ai_provider' y elige 'openai' o 'gemini'")
         print()
         print("2. Actualizar configuraciones en el admin de Django:")
-        print("   - chatbot_channel_id: ID del canal donde funcionará el bot")
+        print("   - chatbot_channel_id: ID del canal donde funcionara el bot")
         print("   - default_chatbot_role_id: Rol por defecto")
         print()
         print("3. Configurar roles en el admin:")
@@ -247,7 +294,7 @@ def main():
         print("5. Reiniciar el bot de Discord")
         
     except Exception as e:
-        print(f"❌ Error durante la configuración: {e}")
+        print(f"Error durante la configuracion: {e}")
         return 1
     
     return 0

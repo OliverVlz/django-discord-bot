@@ -6,9 +6,9 @@ from .models import (
 
 @admin.register(ChatbotConfiguration)
 class ChatbotConfigurationAdmin(admin.ModelAdmin):
-    list_display = ['name', 'is_active', 'created_at']
+    list_display = ['name', 'value', 'is_active', 'created_at']
     list_filter = ['is_active', 'created_at']
-    search_fields = ['name', 'description']
+    search_fields = ['name', 'description', 'value']
     readonly_fields = ['created_at', 'updated_at']
 
 @admin.register(ChatbotRole)
