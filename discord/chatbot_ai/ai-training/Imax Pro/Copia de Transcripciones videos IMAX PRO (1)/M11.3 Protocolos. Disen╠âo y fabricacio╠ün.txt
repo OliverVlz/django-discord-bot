@@ -1,0 +1,99 @@
+Hola, bienvenido, bienvenida de nuevo. Antes de nada, podrás comprobar que del vídeo anterior a este ha habido un cambio. Y nada, simplemente ha sido un cambio de look.
+
+Y bueno, pues hay cambios que a veces se hacen o decisiones que se toman. Las cuales pues uno no debe tener miedo al que dirán, al que piensen. Bueno, son simplemente cambios.
+
+Y hay veces que es necesario como que, oye, algo así duro que te vea reflejado con ese cambio. Para saber que estás en constante evolución, en constante cambio. Y pues por eso hay veces que decido dar un cambio de look severo.
+
+Como puedes comprobar que ha sido esta vez. No es que me hayan tomado el pelo, me lo he tomado yo solo. Entonces nada, simplemente a modo introductorio para que no te quedarás en shock.
+
+Cuando me hayas visto sin pelo. Entonces vamos con esta parte donde vamos a seguir viendo. Y es, quiero que sea algo un poco a modo informativo.
+
+A modo informativo para que sepas bien cómo es el proceso de diseño y fabricación de la prótesis. Porque está bien, ya sabemos las pruebas, protocolos, etcétera. Pero es necesario también saber pasos que hay o cómo los protésicos.
+
+Porque a veces no todo el mundo lo sabemos, cómo se diseña y cómo se fabrica la prótesis. Entonces por eso esta parte es un poco a modo informativo para que tú también lo sepas. Y en cada momento de la fabricación de la prótesis, de la confección, del diseño, etcétera.
+
+Pues tú puedas tener un lenguaje o una comunicación más fluida. Teniendo un nivel de conocimiento o una situación parecida con el protésico. Por eso es tan importante para poder tener un lenguaje similar.
+
+Entonces, para empezar, el diseño de la prótesis a día de hoy debe ser, o los protésicos, está claro, deben ser todos 100% digital. Y ese diseño se realiza en un software que se llama ExoCard. Ese software, los protésicos cargan ahí todos los archivos, pueden cargar también las fotos, pueden cargar también incluso reconstrucciones tridimensionales de un tag para hacer, por ejemplo, correlaciones o correcciones con la posición de los implantes, con los scan body, ¿vale? Esto podría hacerlo tomándole un tag al paciente con los scan body antes de o después de escanearle sin variar la posición.
+
+De tal manera que ellos pueden ajustar, ¿de acuerdo? Esa posición de los scan body, del escaneado intralar, con la posición exacta de los scan body en el tag, ¿vale? Pero no te preocupes, lo veremos también un poquito en el último módulo. De todos modos, esos fin y acabo son protocolos para que pueda ir tomando esos registros. Pero si tienes tag en la clínica, si eres 100% digital y tienes también escáner intraoral, una vez que hayas terminado de escanear esos scan body, puedes tomarle un tag si tu máquina es precisa, si no tiene movimiento, es decir, que sea un tag de calidad, que el paciente no se mueva, con los scan body puestos sin moverlos de posición tal y como lo ha escaneado para que se pueda hacer una reconstrucción, se pueda sacar un archivo STL de ese tag, de ese daicon y en el laboratorio puedan terminar de ajustar por si hay alguna discrepancia con el escaneado y la realidad.
+
+Entonces, con esa reconstrucción lo pueden hacer. Entonces, el diseño se hace en un software que se llama ExoCAD, como te decía. Ahí los protésicos cargan todos los archivos, cargan las fotos, lo cargan toda la información que tienen para empezar a diseñar y ahí hay librerías.
+
+Normalmente, cada laboratorio tiene un número determinado de librerías, los cuales empiezan a trabajar con esos modelos de dientes, con esos moldes, por decirlo de alguna manera, como eran los dientes de tablilla antiguamente, pues tienen los mismos en ExoCAD y de tal manera los van poniendo y van modificándolos. ¿Para qué te cuento esto? Pues te cuento para que tú sepas que a día de hoy el diseño es preciso y preciso me refiero a que se pueden ajustar muy bien las presiones, los puntos de contacto, las oclusiones, la forma de los dientes, etc. Porque el protésico, el diseñador, lo único que tiene que hacer es a golpe de clic ir añadiendo o retirando volumen en esas reconstrucciones, en esas restauraciones.
+
+Entonces, es muy sencillo para el protésico tener una presión determinada en los puntos de contacto, es decir, tú le puedes indicar que te gustan más apretaditos los puntos de contacto o más livianos. Puedes decirle también cómo quieres que sea el diseño, que vamos a verlo también en la zona gingival, puedes decirle también cómo quieres que sea la presión que tiene en oclusal, la morfología, todo. Porque a golpe de clic, el protésico, el diseñador, va añadiendo y quitando material, va añadiendo y quitando volumen, es decir, como si fuera antes un encerador, pues lo que va haciendo es añadir o retirar volumen a esa restauración, de tal manera que es mucho más, podríamos decir, más fácil de ajustar o de modificar una estructura, una protesí, un diseño.
+
+Entonces, se diseña en ExoCAD y luego se pasa a la fase de fabricación. Es decir, por eso la palabra CAD-CAM es de CAD de diseño y CAM de maquinación, de fabricación. Por eso primero es el CAD-CAM para poder diseñar y después manufacturar o maquinar esa protésí.
+
+¿Qué estaríamos ya en la parte de fabricación? Ya hemos visto cómo hay maneras de diferentes tipos de estructuras, ¿vale? Pero aquí lo principal es que sepamos que la fabricación se realiza en una fresadora. Puede ser en una impresora si vamos a trabajar o hacer algún tipo de prueba de protésis provisionales, pero la estructura definitiva se realiza en una fresadora. ¿Y esta fresadora qué hace? Esta fresadora coge un bloque del material que se haya elegido, sea por ejemplo resina, un PMMA, sea un circonio, sea un silicato de litio, sea un bloque pequeño, sea un metal, sea el que sea.
+
+Y en ese disco, en ese bloque del material, lo que hace es ir fresando. Va retirando material hasta dejar la estructura, el diseño que se ha hecho en ExoCAD dentro del bloque, pues sacarlo de dentro del bloque. Es decir, es como esculpir.
+
+Los escultores cogen un bloque de piedra, un bloque de madera, un bloque de lo que sea y van sacando, retirando material, van sacando de dentro esa estructura, ¿vale? Esa figura, esa prótesis. Entonces, eso es lo que yo quiero transmitirte. ¿Por qué? Porque el diseño es sumamente importante.
+
+El protésico, el diseñador, debe saber grosores mínimos de cada material. Debe saber presiones que tienen en gingival y en punto de contacto, en oclusión, etc. Debe saber también las tolerancias o las discrepancias de cada material para que en el momento de la fabricación vaya todo bien.
+
+Porque muchas veces podemos tener problemas en la prótesis que puedan ser o de diseño o de fabricación. Entonces, si es, por ejemplo, que es una estructura que está demasiado delgada y se ha fracturado, pues es un problema de diseño. Si es un punto de contacto que no está bien ajustado o una oclusión que no está bien ajustada, es un problema probablemente de diseño.
+
+Y hay problemas de fabricación que pueden ser que si la fresadora no está bien equilibrada, no está bien ajustada, que el material no sea correcto, que haya un problema con el material, pues podemos tener también problemas propios de la fabricación. Realmente la fabricación, la fresadora, es muy, muy, muy precisa. Mucho más que la impresión, si por ejemplo hablamos de prótesis provisionales.
+
+¿Eso qué quiere decir? Pues que el diseño prácticamente es calcado a la micra en la fabricación. También depende de qué tipo de fresadora se utilice. Pero si utilizamos fresadoras que son de una categoría buena, como deberían ser, pues esas fresadoras son muy precisas. 
+
+A la vez que precisas, son rápidas. Un proceso que aproximadamente, yo te digo, en fabricar una corona, en fresar una corona, en un zirconio, por ejemplo, una fresadora puede tardar alrededor de una media hora. Una corona simple, más o menos, una corona sencillita, así.
+
+Y una rehabilitación grande, de sobre implantes, por ejemplo, sobre seis u ocho implantes, pues dependiendo también las conexiones, una fresadora puede tardar alrededor de dos horas, dos horas y media, dependiendo también qué fresadora. Hay unas más rápidas y otras más lentas. ¿Pero esto también por qué es? Porque ese proceso de fabricación, primero, necesita el fresado, el maquinado, que lleva un tiempo.
+
+Por eso muchas veces pensamos, es que se están alargando mucho en el tiempo, o es que tardan demasiado. Bueno, es que las fases de laboratorio es importante conocerla. Ese diseño conlleva también cierto tiempo.
+
+Ese diseño, cuando son estructuras pequeñas, a mí no me los mandan para comprobarlo, pero cuando son estructuras más grandes o son partes estéticas, pues a mí me lo mandan y yo lo puedo ver con un enlace o desde el móvil o desde el ordenador para comprobarlo y darle el visto bueno al protésico. De tal manera que, si hay que corregir algo, pues se corrige la fase de diseño y ya venga una prueba, o la parte que sea, la fase que ya esté de elaboración de la parte 6, venga ajustada como yo la quiero, no como el protésico puede pensar que yo la quiero. Por eso ya te decía en un vídeo anterior que el protésico me manda lo que yo le pido, pero se lo tengo que saber pedir.
+
+Y al mandarme eso, yo tengo que ver si es correcto y si no es correcto darle las indicaciones correspondientes para que lo modifique. Entonces, en esa fase de diseño, podemos controlarlo, podemos chequearlo antes de que pase a fabricación. Una vez pasa a fabricación, en el fresado, cuando termina la máquina, la fresadora de producir esa pieza, si es por ejemplo un circonio, pues tiene que pasar a un horno desinterizado.
+
+Un horno desinterizado que, dependiendo el tamaño o la cantidad de estructuras, pues tiene que estar más o menos tiempo. Aproximadamente pueden estar entre 6 a 8 o 9 horas desinterizados. ¿Esto para qué te lo vuelvo a decir? Te lo vuelvo a decir para que sepas los procesos.
+
+Entonces, en ese desinterizado es cuando el circonio pasa de estado blando, tiza, que se llama, a un estado ya duro, tal y como lo vemos en boca. Entonces, una vez que ya está desinterizado, es la hora de, pues, leer maquillaje o añadir cerámica rosa si necesario o el glaseado, el cual también tiene que pasar después por otro horno, un horno de cerámica, que también pues lleva un proceso de, depende qué tipo de maquillaje o de cerámica o de glaseado sea, pues probablemente esté entre la media hora y la una hora de cocción. Cada vez que se añada un maquillaje o se añada una cerámica o un glaseado, tiene que volver a pasar por ese horno de cerámica.
+
+Entonces, para que tú veas que es un proceso el cual lleva cierto tiempo, porque muchas veces le queremos pedir cosas al laboratorio a una velocidad que es imposible materialmente tenerlo hecho. Por eso es tan importante tener un buen lenguaje, una buena comunicación con el laboratorio y saber lo que pueden y lo que no pueden hacer, sobre todo si estamos hablando de la fase de diseño. Si hablamos de la fase de diseño, nosotros debemos saber que es muy sencillo poder modificarlo.
+
+Entonces, si queremos o somos capaces de llegar a transmitirle el protésico para que tenga claro cómo nos gusta a nosotros que nos hagan las restauraciones, pues el protésico directamente se va a ceñir a esas presiones en gingival, a esa presión en punto de contacto, a esos contactos oclusales, a esa morfología general, etc. A esa forma de los pónticos, a esa forma de las troneras. Entonces, ahí es donde el protésico debe intentar acoplarse lo máximo a lo que nosotros le pedimos y también nosotros entender lo que puede y lo que no puede modificar el protésico.
+
+Después pasaríamos a la fabricación. Proceso de fresado de zirconio, por ejemplo. Proceso de sinterizado.
+
+Proceso de glaseado, maquillado, añadir cerámica rosa, etc. Cocción también de ese glaseado, de esa cerámica. Y entonces el último paso sería ya cementarle las interfaces al zirconio o la estructura primaria metálica en titanio o en el material que lo hayamos decidido hacer para poder probarlo en boca.
+
+Esas interfaces tienen un proceso de cementado. Hay muchas veces que se recomienda arenar. También depende qué interfase.
+
+La interfase debe tener al menos 4 milímetros de altura. Si es más corta, 4 milímetros, tiende a poder despegarse, descementarse. Entonces, hay muchas veces que decía que se tiende a arenar, a chorrear esa interfase en el laboratorio para mejorar así su capacidad mecánica.
+
+Es decir, su capacidad mecánica para cementarse, para retenerse, mejor dicho. Entonces, realmente si el proceso de cementado es correcto, no debería tener que arenarse esa interfase. También se puede arenar el zirconio en la parte interior del alojamiento para también mejorar esa retención mecánica.
+
+Pero lo más importante de todo es que el proceso de cementación sea el correcto. Y aquí hay algo importante. Para que al zirconio se le pegue bien el cemento hay que ponerle un imprimador.
+
+Es decir, una base que se llama MDP. Lo voy a poner aquí. Se llama MDP, el cual, el laboratorio, te lo digo por si se te están descementando o se te han descementado interfaces, puedes preguntarle si le está poniendo MDP en el alojamiento de la interfase.
+
+Porque ese MDP es lo que va a hacer de unión entre el cemento y el zirconio. Por tanto, el cemento de resina, que puede ser cualquier cemento de resina, por ejemplo, Multilink, hay específicos de aditamentos, lo que pasa es que muchos de ellos tienen un color como más blanquecino y se puede transparentar. Entonces, Multilink normal, a mí me la cementan con Multilink, va a ir perfecto.
+
+Se le coloca. En plan, yo te puedo asegurar, no tengo descementaciones ninguna. Con las interfaces cortas, ya sea una estructura más grande o más pequeña.
+
+Ahora han sacado una interfase nueva, en el 2024, que son más largas y son recortables, porque había gente que se les descementaba. Y le digo, el problema no es la interfase, el problema es el último proceso de fabricación, la cementación. A mí no me la chorrean, tampoco me chorrean el zirconio por dentro, lo único que se hace es colocar el MDP en el alojamiento de la interfase.
+
+Se coloca el cemento de resina, se introduce la interfase hasta su posición, teniendo en cuenta si es rotatoria o antirotatoria. Si es antirotatoria, pues tiene una cara plana, la cual debe estar bien, la tolerancia debe estar bien realizada, es decir, bien ajustada en la fresadora. Porque si esa tolerancia no está bien ajustada, puede que o no encaje la interfase o quede demasiado holguera y pueda tener cierta rotación y entonces no sabemos cuál es la posición exacta.
+
+Una interfase rotatoria debe entrar perfectamente a su posición para que la cara plana quede en su lugar y no tenga posibilidad de movimiento. Entonces, colocar el MDP al zirconio, el primer, el proceso que quiera, hay muchos en el mercado, por ejemplo, hasta el Optimum Plus tiene MDP, se puede utilizar para pincelar el alojamiento. Colocar el cemento, poner la interfase, llevarla presionando hasta su sitio, retirar los excesos y polimerizar.
+
+Es importante también, es un cemento dual, pero que también se activa con la luz. Entonces, si lo polimerizamos en una cámara potente de fotopolimerización, pues vamos a mejorar también esa curación, esa adherencia, esa cementación. Y ya la última fase sería el pulido.
+
+El pulido de toda la zona gingival del zirconio. Hay que intentar que determinadas cerámicas tampoco tengan glaseado en esa zona, pero sobre todo, hablando del zirconio, debe estar ultra pulido. Y eso no es liso, glaseado, no. 
+
+Eso es ultra pulido. El cual quiere decir que obviamente tiene que estar completamente liso ese zirconio en la parte gingival y con discos específicos, con gomas de pulido, tiene que estar pulido a espejo. ¿Por qué? Para que la contaminación bacteriana no sea posible o sea muy poco posible y sobre todo la adherencia del tejido blando a esa zona gingival sea la que debe ser.
+
+De tal modo que se produce una afinidad tan grande entre el tejido blando y el zirconio que la contaminación bacteriana se hace muy, muy, muy difícil. Y ese sería el último paso de fabricación. Por supuesto que esté la protección limpia, que no tenga excesos de cemento donde no debe, que no tenga suciedad en el alojamiento de las interfaces, que sea una prótesis que está bien.
+
+Bien realizada, bien diseñada, bien fabricada, bien terminada y bien presentada. Ese sería el proceso de fabricación. Por tanto, primero el diseño, después el fresado, después el glaseado, maquillado, etc.
+
+Cementación de interfaces y por último el ultra pulido. Espero que por lo menos esto te haya aclarado cuál es el proceso de fabricación para que si tienes problemas puedas tú también saber en dónde deben estar. Porque si tienes un proceso de cementación de interfaces tú ya sabes o puedes intuir qué le debes preguntar al protésico para intentar solucionarlo, no para echarle la culpa al protésico, ni mucho menos, para intentar solucionarlo.
+
+También te digo, si ves que no se soluciona, lo mejor es que buscas otra alternativa, cambia de protésico. Si algo no funciona, pues hay que cambiar. Porque si no, vamos a seguir teniendo los mismos resultados.
+
+¿De acuerdo? Pues con este modulito, con esta parte del módulo, con este cambio de look, vamos al siguiente.

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     ChatbotConfiguration, ChatbotRole, ChatbotSession, 
-    ChatbotMessage, ChatbotUsage, ChatbotTraining
+    ChatbotMessage, ChatbotUsage, ChatbotTraining, ChatbotKnowledgeChunk
 )
 
 @admin.register(ChatbotConfiguration)
@@ -45,3 +45,12 @@ class ChatbotTrainingAdmin(admin.ModelAdmin):
     list_filter = ['training_type', 'is_active', 'priority']
     search_fields = ['name', 'content']
     ordering = ['-priority', 'name']
+
+
+@admin.register(ChatbotKnowledgeChunk)
+class ChatbotKnowledgeChunkAdmin(admin.ModelAdmin):
+    list_display = ['source_file', 'course', 'module', 'chunk_index', 'token_count', 'created_at']
+    list_filter = ['course', 'created_at']
+    search_fields = ['content', 'source_file', 'module']
+    readonly_fields = ['created_at', 'updated_at', 'token_count']
+    ordering = ['course', 'source_file', 'chunk_index']

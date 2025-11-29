@@ -8,39 +8,70 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from asgiref.sync import sync_to_async
 from .models import ChatbotSession, ChatbotMessage, ChatbotConfiguration, ChatbotTraining
+from .vector_service import vector_service
 
 class AIService:
     """Servicio para interactuar con APIs de IA"""
     
     def __init__(self):
-        self.openai_api_key = os.environ.get('OPENAI_API_KEY')
-        self.gemini_api_key = os.environ.get('GEMINI_API_KEY')
-        self.default_provider = os.environ.get('AI_PROVIDER', 'openai')
         self.max_retries = 3
         self.timeout = 30
     
-    async def get_system_prompt(self) -> str:
-        """Obtiene el prompt del sistema desde la base de datos"""
+    def _get_openai_api_key(self) -> str:
+        """Obtiene la API key de OpenAI desde variables de entorno"""
+        api_key = os.environ.get('OPENAI_API_KEY', '')
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY no configurada en variables de entorno (.env)")
+        return api_key
+    
+    def _get_gemini_api_key(self) -> str:
+        """Obtiene la API key de Gemini desde variables de entorno"""
+        api_key = os.environ.get('GEMINI_API_KEY', '')
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY no configurada en variables de entorno (.env)")
+        return api_key
+    
+    async def get_system_prompt(self, user_query: str | None = None) -> str:
+        """Obtiene el prompt del sistema con contexto RAG relevante"""
         try:
-            # Obtener prompt del sistema
             system_prompt = await self._get_config_value('system_prompt', self._get_default_system_prompt())
             
-            # Obtener entrenamientos activos
             trainings = await self._get_active_trainings()
             
-            # Construir prompt completo
             full_prompt = system_prompt
             
             if trainings:
-                full_prompt += "\n\n## Información Adicional:\n"
+                full_prompt += "\n\n## Reglas Adicionales:\n"
                 for training in trainings:
                     full_prompt += f"\n### {training['name']}\n{training['content']}\n"
+            
+            if user_query:
+                try:
+                    rag_context = await self._get_rag_context(user_query)
+                    if rag_context:
+                        full_prompt += f"\n\n{rag_context}"
+                except Exception as e:
+                    print(f"Error obteniendo contexto RAG: {e}")
             
             return full_prompt
             
         except Exception as e:
             print(f"Error obteniendo system prompt: {e}")
             return self._get_default_system_prompt()
+    
+    async def _get_rag_context(self, query: str, limit: int = 5) -> str:
+        """Obtiene contexto relevante usando búsqueda vectorial RAG"""
+        try:
+            chunks = await vector_service.search_similar_chunks(query, limit=limit)
+            
+            if not chunks:
+                return ""
+            
+            return vector_service.format_context_for_llm(chunks)
+            
+        except Exception as e:
+            print(f"Error en búsqueda RAG: {e}")
+            return ""
     
     def _get_default_system_prompt(self) -> str:
         """Prompt por defecto del sistema"""
@@ -82,22 +113,6 @@ RESPUESTAS:
         except Exception:
             return default or ""
     
-    async def _get_api_key_from_config(self, provider: str) -> str:
-        """Obtiene la API key desde ChatbotConfiguration"""
-        try:
-            config_name = f"{provider}_api_key"
-            config = await sync_to_async(
-                lambda: ChatbotConfiguration.objects.filter(name=config_name, is_active=True).first()
-            )()
-            if config:
-                return config.value
-            from invitation_roles.models import BotConfiguration
-            bot_config = await sync_to_async(
-                lambda: BotConfiguration.objects.filter(name=config_name, is_active=True).first()
-            )()
-            return bot_config.value if bot_config else ""
-        except Exception:
-            return ""
     
     async def _get_active_trainings(self) -> List[Dict]:
         """Obtiene entrenamientos activos"""
@@ -155,11 +170,9 @@ RESPUESTAS:
         start_time = time.time()
         
         try:
-            # Obtener prompt del sistema y contexto
-            system_prompt = await self.get_system_prompt()
+            system_prompt = await self.get_system_prompt(user_query=user_message)
             context_messages = await self.get_context_messages(session)
             
-            # Construir mensajes para la API
             messages = [{"role": "system", "content": system_prompt}]
             messages.extend(context_messages)
             messages.append({"role": "user", "content": user_message})
@@ -185,9 +198,7 @@ RESPUESTAS:
     
     async def _call_openai(self, messages: List[Dict]) -> Tuple[str, int]:
         """Llama a la API de OpenAI"""
-        api_key = await self._get_api_key_from_config('openai') or self.openai_api_key
-        if not api_key:
-            raise ValueError("OpenAI API key no configurada. Configúrala en Django Admin (openai_api_key) o en .env (OPENAI_API_KEY)")
+        api_key = self._get_openai_api_key()
         
         model_name = await self._get_config_value('openai_model', 'gpt-4o-mini')
         print(f"🔍 Usando modelo OpenAI: {model_name}")
@@ -237,9 +248,7 @@ RESPUESTAS:
     
     async def _call_gemini(self, messages: List[Dict]) -> Tuple[str, int]:
         """Llama a la API de Google Gemini"""
-        api_key = await self._get_api_key_from_config('gemini') or self.gemini_api_key
-        if not api_key:
-            raise ValueError("Gemini API key no configurada. Configúrala en Django Admin (gemini_api_key) o en .env (GEMINI_API_KEY)")
+        api_key = self._get_gemini_api_key()
         
         model_name = await self._get_config_value('gemini_model', 'gemini-2.5-flash')
         api_version = await self._get_config_value('gemini_api_version', 'v1')

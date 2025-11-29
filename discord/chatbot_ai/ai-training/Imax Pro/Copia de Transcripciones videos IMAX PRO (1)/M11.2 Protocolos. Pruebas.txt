@@ -1,0 +1,103 @@
+Muy bien, vamos a la siguiente parte, vamos a ver pruebas necesarias que tenemos que hacer, o quizás no las tenemos que hacer, porque, a ver, estamos anclados en pensamiento, en protocolos, en formas de trabajo antiguas, anteriores, menos precisas, sobre todo si son analógicas. ¿Por qué? Porque nuevamente entra la mano del ser humano en el proceso de fabricación, sobre todo de preparación. El primero es en la toma de registro, de acuerdo, pero el siguiente es en el procesado en laboratorio, es decir, a la hora de colocar esos análogos, de poner la escayola, de que frague la escayola, es decir, hay pequeños puntos donde se puede ser menos preciso, o donde, como hay más pasos, pues un pequeño error en cada uno, no es lo mismo un pequeño error en 10 pasos que en 5 pasos, es el doble de impreciso. 
+
+Entonces, pruebas. Pues estas son las pruebas habituales, las pruebas comunes, las pruebas de toda la vida. Bien, la articulación ya la hemos visto, la articulación única y exclusivamente es necesaria cuando lo vamos a hacer en un protocolo analógico o en un protocolo mixto digital-analógico porque no tenemos un flujo 100% digital. 
+
+Entonces, yo te lo voy a explicar analógico y digital porque básicamente es la misma prueba, pero te voy a decir cómo, gracias a la parte digital, puedes acortar todos esos procesos y cuál es mi protocolo que hago a día de hoy, ¿de acuerdo? Bien, la articulación está clara, esa articulación se tiene que confeccionar de manera analógica y para protocolos analógicos. Esto quiere decir que si tú eres digital pero tu laboratorio no consigue tener ese flujo 100% digital, te van a tener que mandar ellos a ti una prueba analógica. Entonces, ya estamos mezclando analógico y digital. 
+
+¿Esto qué quiere decir? Tú le puedes tomar un escaneado y ellos determinadas pruebas te las hagan analógicas. Eso a mí me ha pasado, entonces por eso te lo digo. Porque no terminábamos de estar en unión, no había una buena comunicación ni un buen flujo digital 100% por las dos partes. 
+
+A día de hoy eso ya se ha terminado y también te voy a explicar, sobre todo en casos de rehabilitaciones completas, de uno de los dos más silabes, cómo hacerlo para evitar tener que hacer esas pruebas que te hace tu laboratorio de manera analógica. Pero bueno, si nos saltamos ya a la articulación que todo el mundo obviamente sabemos cómo es, que tú sabes cómo es perfectamente, lo único que hay que hacer es una plancha base, un rodillo de cera, calentarlo bien, tomar la articulación y mandarlo al laboratorio. Y el laboratorio ya, pues si tú lo has hecho analógico y el laboratorio es digital, pues monta esos modelos, escanea los modelos y diseña. 
+
+Si el laboratorio todavía sigue siendo analógico, pues tiene que montar esos modelos y empezar a encerar, a fabricar analógicamente. Esas son las pruebas de, mejor dicho, la fase donde lo enceran para colarlo, etcétera. Estamos hablando de protocolos antiguos y realmente no te los voy a explicar porque yo lo que intento es que no hagas esos protocolos, porque a día de hoy está más que demostrado que son menos rentables, dan más problemas, son más costosos, más tiempo, etcétera.
+
+Entonces vamos a comprender cómo además ese protocolo, esa manera de trabajar, ya seguramente la sabes, vamos a ver cómo podemos hacerlo de manera digital para acortar. Entonces, cuando aquí vamos a poner, cuando es unitario y vamos a poner aquí múltiple de una a tres piezas y múltiple más de tres piezas. ¿Por qué diferencia hay? En digital, cuando tú vas a tomar un escaneado de una corona unitaria, es muy, muy, muy preciso. 
+
+Depende del escáner que tengas, pero los últimos escáneres son altamente precisos. Es decir, tú podrías, o puedes, mejor dicho, fabricar esa corona sin necesidad de hacer ningún tipo de prueba. Entonces tú lo único que necesitarías ahí sería hacer el escaneado de los dos masilares, tomar la oclusión y mandar a diseñar. 
+
+Comprobar el diseño, comprobar el diseño y una vez que has comprobado el diseño, entonces darle el visto bueno al laboratorio y que el laboratorio te fabrique y te mande la corona. Te digo, darle el visto bueno si no tienes todavía pulido la comunicación con el laboratorio y tu laboratorio no sabes cómo te gusta trabajar a ti. El laboratorio debe saber cómo te gusta trabajar a ti o de qué manera te gustan las prótesis para no tener que estar en constante comunicación, perdiendo tiempo por tu lado, perdiendo tiempo por ellos, atrasando todo para dar un visto bueno a una corona unitaria.
+
+Una corona unitaria ya debe saber el laboratorio cómo hay que hacerla. Sobre todo si estás trabajando a pilar intermedio, pues te puedo decir que es muy sencillo, muy sencillo. Y si estás trabajando a directo implante, todavía sigues trabajando a directo implante después de llevar a 11 módulos, pues bueno, también vamos a ver cómo es en el diseño pero vamos a intentar que no sigas trabajando directo implante.
+
+Por muchos motivos ya sabes cuál es. No me voy a volver a parar en eso. Entonces cuando es unitario, tú haces el escaneado, te hacen el diseño, tienes dos opciones, comprobar o no comprobar el diseño, si el laboratorio ya está acostumbrado a cómo tú trabajas, entonces como yo lo hago, es como ya saben cómo me gusta y cómo trabajo, directamente fabrican.
+
+Yo escaneo, mando al laboratorio, fabrican y me lo mandan terminado, en zirconio con una interfase titanio cemento atornillada. ¿De acuerdo? ¿Por qué me lo mandan terminado? Pues porque hacer ahí una prueba de plástico no le veo mucho sentido, siempre y cuando se haya conseguido un buen escaneado de las paredes interproximales. Súper importante, escanear muy bien las paredes interproximales.
+
+Esto es un error que en analógico se suele cometer bastante porque se desgasta de manera accidental o de manera, muchas veces, intencionada, porque los protésicos a veces modifican esas paredes para darle un mejor asentamiento a la corona, los cuales luego no entran. Pero yo te digo que a mí esas cosas muy rara vez es cuando me pasa, porque eso hay tolerancias. Y el laboratorio debe saber qué tolerancia te gusta a ti.
+
+Una tolerancia de x micra, pues tú debes saber que aproximadamente tienes que apretarlo, ese punto de contacto tienes que apretarlo una 0.5 micra, más o menos. De todos modos a ellos los software de diseño les sale cuando está en un contacto óptimo según lo que ellos estiman. También déjate guiar por tu laboratorio, ¿de acuerdo? Pero 0.5 micra es un buen ajuste a las paredes proximales.
+
+Si te gusta más apretadito, pues le dices que te lo aprietes, más que suceda que probablemente te cueste entrar y entonces ya tienes que retocarlo en boca. El punto de contacto tiene que estar suficientemente apretado para que a la hora de colocarlo un hilo, pues como ya sabes, haga clac, clac, cuando pase por el punto de contacto. Ni no pase, ni se cuele sin hacer ese freno, porque si no, el punto de contacto se le va a empaquetar comida.
+
+No sería el fin del mundo, a veces puede suceder, a veces puede suceder, ¿de acuerdo? Esto no es que siempre salgan las cosas bien, pero intentamos minimizar. Bien, entonces el unitario se puede mandar terminado, ya glaseado y toda la zona gingival ultra pulida. ¿Vale? Ultra pulida. 
+
+Lo vamos a ver un pelín más adelante, un poquito más adelante, en esa fabricación de la prótesis, en cómo tiene que ser esa fabricación y terminación de la prótesis. Entonces el unitario puede venir directamente terminado. Es decir, a ver, todo es ponerse tan bien con el laboratorio y su flujo de trabajo, pero si tú tomas un día, lo has caneado, en tres días podrías tener esa corona.
+
+En tres días podrías tener esa corona. Entonces, el unitario puede ir directo a terminar. No hace falta ni prueba de estructura, ni prueba de diente, por supuesto en plástico, ni prueba de estructura en zirconio, sin glasear, ni por supuesto ya casi a punto de terminar ni en bizcocho, que en zirconio realmente no existe. 
+
+Entonces ya tiene que venir terminado. ¿Vale? Terminado. Hay que modificar un poco el concepto y el protocolo de trabajo, porque no estamos trabajando con metales cerámicas, con prótesis antiguas, con conceptos antiguos. 
+
+Estamos trabajando con conceptos nuevos. Prótesis múltiples de una a tres piezas. Podemos seguir haciendo el mismo protocolo.
+
+El mismo protocolo. Debemos ser suficientemente precisos y nuestro laboratorio también, para que un puente de tres piezas sobre dos implantes entre perfectamente, sin necesidad de hacer pruebas, ni verificaciones de pasividad, ni nada. ¿Por qué? Porque lo primero, tenemos que tener un escáner que sea preciso. 
+
+Un sistema de escaneado que sea también preciso. No todos los sistemas de implantes tienen unos scan body que son igual de precisos. Ya te lo he dicho antes. 
+
+Cuanto más bajo es el scan body, más preciso es. Y ser suficientemente hábil en nosotros, tener una técnica de escaneado suficientemente buena para ser lo más precisos que podamos. ¿Eso cómo se consigue? Pues como te he dicho, lo primero que se hace es escanear el arco completo. 
+
+Una vez escaneado el arco completo, ya escaneamos alrededor del arco de vestibular palatino, de vestibular alingual, para ir rellenando el arco. Y finalmente, terminamos de escanear la zona donde están los implantes con scan body. Y súper importante, súper importante, esto es muy importante, que la zona, la pared anterior o mesial y distal, al tramo idéntico que va a escanear, estén muy bien escaneados. 
+
+Porque si no, lo que va a hacer ahí la inteligencia artificial del software del escáner es rellenarla. Va a rellenar esa malla y probablemente no va a ser como está en la realidad. Entonces eso es sumamente importante. 
+
+Es preferible que escanees perfecto eso y que te dejes en malla sin rellenar por vestibular o por palatino de otros dientes, que no escanees perfecto eso. Aquí la clave es que el escaneado tenga una continuidad. Es decir, que siempre haya imagen por donde estás escaneando. 
+
+Que no haya huecos muy grandes sin imagen, porque entonces ahí se puede producir una flexión, una distorsión. Entonces lo que necesitamos es una buena imagen en todo el arco. Por tanto, si a veces no tienes suficiente precisión o te falla el digital, pues mira a ver si ese puede ser uno de los problemas que te lo están produciendo, uno de los errores que te lo están produciendo. 
+
+Cuando es múltiple de más de tres piezas, ya quiere decir que vamos a tener ya al menos tres implantes. Porque si son cuatro, salvo que sea sector anterior, que es un poco diferente y se podría hacer también, pero sí, ahí habría que hacer una prueba estética obviamente. Pero en zonas posteriores con múltiple, es decir, más de tres piezas, sí es recomendable hacer una prueba de pasividad. 
+
+Que puede ser la misma estructura de los dientes en plástico con la interfase para comprobar que hay un ajuste correcto. Para que veamos que ese ajuste es el que debe ser. ¿Por qué? Pues porque al tener ya tres implantes y ser un tramo más largo, puede que haya un poco de imprecisión. 
+
+Entonces ahí sí es recomendable. Yo a día de hoy no lo hago, pero si quieres evitarte problemas con el laboratorio y con los pacientes, pues te recomiendo que haga esa prueba. Que haga una prueba en plástico, tal cual va a ser la prótesis, a espesor total, pero en plástico. 
+
+¿Para qué? Para comprobar lo primero, que asienta en su posición. Y segundo, si tienes que retocar oclusión, si tienes que retocar oclusión, que la puedas retocar en el plástico y hacer un reescaneado. Para que el laboratorio con ese reescaneado, todo lo que tú modifica en boca de la prótesis, debe reescanearlo. 
+
+Y no le tienes que mandar de nuevo la prótesis al laboratorio. Lo coloca en boca, lo retoca y lo reescanea. Y le manda esos archivos. 
+
+Y el protésico lo que hace es, con ese archivo escaneado, que ya está retocado, lo superpone a su diseño y lo modifica hasta dejarlo exactamente igual. Por eso no tienes que mandar las pruebas que te manda el laboratorio, de plástico, pruebas impresas, pruebas del tipo que sea, digitales, perdón. No tienes que mandarlas de nuevo al laboratorio. 
+
+Tú lo que tienes que mandar son los archivos. Esas pruebas te las puedes quedar, las puedes tirar o si es una resina y son provisionales y se lo quieres dejar al paciente para que se acostumbre, se lo puedes dejar. No tienes que mandarlo de nuevo al laboratorio. 
+
+Por eso, cuando son sectores posteriores, es recomendable hacer esa prueba de dientes que a la vez te sirve para la oclusión, para los contactos y para la pasividad. Si es una zona estética, si es un sector anterior o una zona que llegue hasta la línea de sonrisa, pues sí es recomendable hacer una prueba en plástico, una prueba de dientes en plástico para comprobar realmente la estética. También habremos tenido que tomar a veces fotografías para poder comprobar bien el diseño, pero cuando no es una rehabilitación completa, pues hay muchas veces que no es necesario tomar esas fotografías porque tienen referencias. 
+
+Pero por ejemplo, si es un sector anterior completo que va de canino a canino, pues sí te recomiendo tomar fotografías faciales. Vas a poder acoplarlo en el último módulo, que es el de arcadas completas, de rehabilitaciones masilares completas. Vas a poder extrapolar, vas a poder acoplar el protocolo fotográfico, el protocolo de toma de registro a un tramo más corto, un tramo edéntulo, para poder hacerlo de una manera más precisa y sobre todo que el resultado estético sea bueno. 
+
+Porque es importante que esas pruebas estéticas se vean al paciente y hacer fotos con esas pruebas estéticas para también mandarlo al laboratorio. Pero bueno, todo en el último módulo lo vas a ver globalizado para las rehabilitaciones completas y de ahí lo vas a poder acoplar a rehabilitaciones más pequeñas o siempre que quieras a cualquier tipo de paciente. Así que en esas prótesis múltiples habría que hacer, o yo te recomiendo hacer esa prueba de plástico cuando son más de tres implantes, una prueba de plástico para comprobar pasividad, para comprobar oclusión, puntos, ajustes, etcétera. 
+
+Estética también. Y entonces, si no se ha modificado nada, lo único que se le dice al laboratorio es termínamelo. Hay que también saber tomar bien el color, mandar fotografías intraorales con referencias de color, con la guía al lado para que se vea en la guía el color y la forma del diente para que el protésico pueda ajustar todo lo que pueda ese color para que el resultado estético sea lo mejor posible. 
+
+Por eso yo recomiendo, o yo he podido comprobar, y por eso te lo digo así, que si se hacen esos pasos, si se toman en zonas estéticas fotografías extraorales, fotografías intraorales con el color y se hacen pruebas de plástico, pues se puede mandar directamente a terminar. Obviamente, una toma de color para un molar inferior o un molar superior, pues no le ve mucho sentido. Yo no hago fotografías de toma de color para esas piezas, pero si es algo que está ya en sonrisa, pues entonces sí la hago para intentar maquillar ese circonio, para intentar acoplar y dar el mejor resultado estético posible. 
+
+Por tanto, podríamos decir que la prueba de estructura nos la podemos cargar, la prueba de bizcocho nos la podemos cargar, y lo único que haríamos, dependiendo si es una revitación más o menos, sería la prueba de dientes que a su vez nos podría servir de pasividad en tramos pequeños, no estamos hablando de arcadas completas, en arcadas completas la vamos a hacer de otra manera, ya llegaremos, dientes y pasividad para comprobar y ajustar si tenemos que retocar, si tenemos que retocar esta prueba, no la pasividad, no la pasividad, si tenemos que retocar la estructura, el diente, el punto de contacto o la oclusión o lo que sea, si tenemos que retocarlo, si tenemos que añadirle porque se han quedado cortos, le podemos añadir en composite, comprobar estéticamente o cruzalmente si es necesario y reescanearle. Entonces hay que hacer un reescaneado. Siempre y cuando haya que modificar esa prueba de dientes, esa prueba de plástico, hay que reescanear. 
+
+Si hay una falta de pasividad, que no hay pasividad y la estructura no entra, lo primero que hay que ver es por qué no entra. Puede ser que esté muy apretado los puntos de contacto y no entre o puede ser que el eje de inserción no lo hayamos encontrado. Cuando los implantes no están completamente paralelos y hay más de dos implantes, a veces hay que buscarle el eje de inserción. 
+
+No siempre entra, si no están perfectamente rectos los implantes, no siempre entra vertical. Hay muchas veces que si un implante está un poco angulado, primero tiene que vascular de uno y entrar en el otro. Pero eso al fin y al cabo también te lo debe de alguna manera poder decir el laboratorio, pero también vas a tener que verlo tú. 
+
+Es decir, si no entra tal cual así a la primera, no te agobies porque probablemente le tienes que buscar el eje de inserción. Entonces siempre que se modifica hay que reescanear. Salvo que la pasividad no sea la correcta, entonces tendrías que tomar un reescaneo. 
+
+Para tomar ese reescaneo lo único que hay que hacer es volver a escanear de la misma manera. Y si vuelve a surgir el problema y no tienes pasividad, entonces hay que ver si es por técnica tuya de escaneado, técnica del escáner que no sea suficientemente preciso o propiamente del laboratorio. Aún así también hay maneras de comprobar esa pasividad digitalmente, hacer esas férulas de verificación de manera digital. 
+
+Las cuales, como las vamos a ver en la prótesis completa, pues cuando llegue el momento las podremos ver, podremos comprobar cómo se hace y eso se acopla. Pero te puedo decir que siguiendo un buen protocolo y teniendo un diseñador, un protésico, fino, preciso, prácticamente no va a necesitar, y teniendo un buen escáner y una buena técnica de reescaneado, prácticamente no va a tener discrepancias y no va a tener necesidad de reescaneo. ¿Bien? Por tanto, pues tú fíjate de ser analógico y tener que hacer una prueba analógica para un tramo de más de tres piezas, impresión, articulación, la prueba de dientes, prueba estética, la estructura, el bizcocho y terminado. 
+
+Serían seis citas, cinco quizás, teniendo en cuenta que el diente haga pasividad simultáneamente. Si te vas al digital, tienes una cita donde tomas registro, tomas articulación, tomas fotografías si las necesitas. Si hay un tramo de más de tres, en la siguiente hacen la prueba de dientes, la prueba de plástico, con pruebas. 
+
+Si es poco el ajuste, yo siempre digo que si el ajuste es menor, es decir, es a lo mejor solo un poco de oclusión, un poco de modificación de la anatomía, no es necesario hacer una prueba. Si es una gran modificación, porque está muy alto, porque está muy bajo, sí sería recomendable. De todos modos, si tú colocas una prueba de plástico y está muy bajo, le falta mucha oclusión, tienes que reescanear. 
+
+Reescanear de nuevo para que el prótesico pueda acoplarlo. Siempre que haya algo que no ajusta en boca, hay que reescanear. Siempre. 
+
+Ya sea porque se queda corta la oclusión, hay que reescanear, o porque se queda larga y está bien asentado, comprobar con radiografía antes de empezar a retocar que la prótesis está en su sitio. Retocar y una vez que esté retocado, a rescanearlo para que puedan modificarlo. Así que sería la prueba de toma de escaneado y registro, la prueba estética, la prueba de plástico en dientes y terminado. 
+
+Serían tres citas frente a seis citas. De hecho, a día de hoy ya hay muchas estructuras que no las prueban que sean de más de tres, pero esto necesita esa curva de aprendizaje, esa precisión, ese hábito, no solo por ti, sino por el laboratorio, que también sea bueno. Por tanto, yo pruebas que iban a cinco o seis, trabajos que iban a cinco o seis pruebas, a día de hoy es únicamente dos. 
+
+Así que, ya sabes, fórmate bien en lo digital, es decir, coge una buena curva de aprendizaje, trabaja con un buen laboratorio, ten un buen escáner, un buen protocolo de escaneado, ten las cosas claras, aquí lo tienes todo, no hace falta más, te lo puedo asegurar, no hace falta más. No es necesario saber más de tolerancias, ni ajustes, ni nada. Simplemente los pasos que tienes que dar y si están bien ejecutados, se comprueba que está correcto y se termina. 
+
+Así que, vamos al siguiente punto. Let's go.

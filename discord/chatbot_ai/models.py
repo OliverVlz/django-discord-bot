@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from datetime import datetime, timedelta
 import json
+from pgvector.django import VectorField
 
 class ChatbotConfiguration(models.Model):
     """Configuración del chatbot de IA"""
@@ -141,3 +142,33 @@ class ChatbotTraining(models.Model):
         ordering = ['-priority', 'name']
         verbose_name = "Entrenamiento Chatbot"
         verbose_name_plural = "Entrenamientos Chatbot"
+
+
+class ChatbotKnowledgeChunk(models.Model):
+    """Chunks de conocimiento vectorizados para RAG"""
+    
+    COURSE_CHOICES = [
+        ('imax_launch', 'IMAX Launch'),
+        ('imax_pro', 'IMAX Pro'),
+    ]
+    
+    content = models.TextField(help_text="Contenido del chunk (~500 tokens)")
+    embedding = VectorField(dimensions=1536, help_text="Vector embedding de OpenAI")
+    source_file = models.CharField(max_length=255, help_text="Archivo de origen")
+    course = models.CharField(max_length=20, choices=COURSE_CHOICES, db_index=True)
+    module = models.CharField(max_length=100, blank=True, help_text="Módulo extraído del nombre")
+    chunk_index = models.IntegerField(default=0, help_text="Índice del chunk en el archivo")
+    token_count = models.IntegerField(default=0, help_text="Número de tokens en el chunk")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.course} - {self.source_file[:30]}... (chunk {self.chunk_index})"
+    
+    class Meta:
+        ordering = ['course', 'source_file', 'chunk_index']
+        verbose_name = "Chunk de Conocimiento"
+        verbose_name_plural = "Chunks de Conocimiento"
+        indexes = [
+            models.Index(fields=['course', 'source_file']),
+        ]

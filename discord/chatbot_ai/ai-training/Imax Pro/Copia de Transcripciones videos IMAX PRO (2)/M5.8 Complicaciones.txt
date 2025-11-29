@@ -1,0 +1,51 @@
+Hemos llegado a la última parte de este módulo, hemos llegado a la parte de las complicaciones. Aquí es donde todo el mundo puede empezar a pensar que ¿y si me surge esto? ¿y si me surge esto? ¿o cuando me sucedió no supe qué hacer? Para mí hay dos complicaciones que son las más comunes, las más habituales, que de manera intraoperatoria te pueden suceder. Una de ellas, ¿cuál es? Pues que al terminar de colocar el implante no tenga suficiente estabilidad primaria.
+
+¿Por qué puede suceder esto? Porque hemos fresado de más en un hueso en el que no hemos sido capaz de comprobar si estaba suficientemente duro o el feeling que nos transmitía el hueso y entonces hemos fresado de más. ¿Y qué sucede? Pues que puede llegar el caso en el que nuestro implante no consiga estabilidad primaria suficiente. Aquí tenemos una opción y la opción es retirar el implante.
+
+Hay muchas veces que el implante como no tiene torque, como no tiene agarre sobre el hueso, aunque pongamos a contrahorario el motor a sentido contrahorario, no puede salir. Entonces vamos a necesitar traccionar del transportador o de algún aditamento que podamos enroscarle al implante para poder tirar de él hacia fuera. Si utilizamos implantes con transportadores, por ejemplo, como hay que limpiar con el transportador roscado, vamos a poder tirar de él fácilmente.
+
+En cambio, si hay el transportador macizo, no, porque probablemente se desinserte. Entonces tendremos que utilizar algún aditamento, algún transportador que tengamos antiguo, algo para poder atornillarlo y tirar de él hacia fuera. Un pilar de impresión, cualquier aditamento que nos permita tirar del implante sin necesidad de que rote. 
+
+Además de eso, ¿qué vamos a hacer? Pues vamos a retirar el implante y vamos a profundizar más el fresado, pero ojo, vamos a profundizar más el fresado con una fresa 2 pasos reducida al implante que estamos colocando. Es decir, si estamos colocando un implante de 4 milímetros de diámetro y hemos llegado equivocadamente, no nos hemos fijado y hemos fresado con la de 3.6, vamos a profundizar 2 milímetros más con la fresa 2 pasos anterior. ¿Cuál en este caso? La de 2.6. Tendríamos 3.6, 3.2, 2.6. Perforando, profundizando esos 2 milímetros más que vamos a conseguir, vamos a conseguir un labrado óseo 2 milímetros más profundo, pero muy reducido, en el cual volvemos a montar nuestro implante en el transportador del motor.
+
+A mí me gusta colocar los implantes siempre con el motor, porque tengo más capacidad de corregir la posición del implante. Por tanto, colocamos el implante en el transportador, en el motor, volvemos a colocarlo, sentido horario, y empezamos a introducirlo. Cuando el implante va llegando a esa zona, probablemente tengamos que hacer presión para que consiga entrar la primera espira en esa perforación y entonces luego ya baje.
+
+Obviamente tenemos que ver que tenemos implante, mejor dicho, una situación donde no tengamos ningún límite anatómico que no podamos tocar, ¿de acuerdo? Esa sería la primera solución, utilizar el mismo implante perforando más con un diámetro dos veces inferior al del implante que estamos colocando, al de las fresas que habíamos utilizado, y hacer presión a la hora de colocarlo. Otra solución, si no podemos perforar más, es utilizar un implante más ancho. ¿Cuánto más ancho? Pues yo recomiendo que sea dos pasos por encima, es decir, si hemos colocado un implante de 3,5 y no hemos conseguido estabilidad, deberíamos colocar un implante de 4,5. 
+
+¿Qué sucede? Que la gran mayoría de las veces no va a ser posible porque va a ser un implante demasiado ancho. Entonces, vamos a colocar el implante de diámetro superior. ¿Qué vamos a hacer con ese implante que no hemos podido colocar? Pues tendremos que hablar con la casa comercial para que nos lo devuelvan.
+
+Entonces, si vamos a colocar el 3,5, colocaremos un implante de 4 en vez del implante de 3,5. Para, sin fresar más, intentar que gane esa estabilidad primaria que le permita mantenerse. ¿De acuerdo? Esas serían las posibles dos soluciones si tenemos una baja estabilidad primaria.
+
+Es decir, la primera sería implante más profundo y la segunda sería implante más ancho. Bien, y ahora aquí en estabilidad primaria tenemos lo contrario. Tenemos que tenga tanta estabilidad primaria o tenga tanto torque que el implante no termina de bajar a su profundidad.
+
+¿Qué solución tenemos? Pues tenemos la solución de dependiendo. Si el implante se ha bloqueado a 50 N y no ha bajado ni la mitad del implante, es porque hemos cometido un error en el fresado. Debemos retirar el implante y fresar de la manera correcta.
+
+Hay veces que cuando el hueso es muy cortical necesitamos incluso fresar los primeros milímetros con la fresa siguiente al diámetro del implante. Quiero decir, si vamos a colocar un implante de 4 y la fresa correspondiente de 3,6, pero el hueso es un hueso mandibular muy rígido, muy duro, vamos a necesitar, si vamos a colocar un implante de 10 y estamos fresando a 12, pues por lo menos pasar la fresa de 8 a 4,2 de diámetro. ¿Por qué? Porque todo eso nos está impidiendo, imposibilitando que el implante baje a su sitio, porque ha un hueso tan denso que el implante se atrapa.
+
+Entonces no vamos a poder pasar más allá, aunque queramos con la carraca, porque el implante puede llegar a bloquearse y aparte el daño óseo, la presión que está ejerciendo, va a ser contraproducente. Ya lo vimos, va a producir microcracks. Esos microcracks van a hacer que haya una reabsorción mayor alrededor del implante y muy probablemente ese implante empiece con patologías muy tempranas, dolor e inflamaciones y termine fracasando.
+
+Por tanto, eso es lo que podemos hacer. Si el torque es excesivo, pero el implante ya está en su último milímetro, dos milímetros para llegar a su posición final, lo único que tenemos que hacer es coger la carraca, darle torque antihorario, torque horario e ir bajándolo poco a poco, comprimiendo. Esto también va a depender un poco del feeling que veamos. 
+
+Si vemos que ese hueso está demasiado, demasiado, demasiado duro, vamos a tener que retirar el implante. Vamos a tener que fresar un poquito más, como he explicado, y colocar de nuevo ese implante. Por tanto, tenemos esas dos situaciones de que esté el implante más allá de la mitad ya insertado o no haya llegado.
+
+Tendremos que hacer un movimiento de torque contra torque, horario contra horario o retirar y fresar incluso más del diámetro del implante, pero menos milímetros, para que el implante coja torque en los últimos milímetros y deje un alveolo más ancho, el cual se estabilice un coágulo y forme una unión estable, una neoformación ósea alrededor del implante. Profundidad. ¿Qué sucede? Hay muchas veces que el implante llega un momento en el que no baja más, pero aparte que no baja más, que patina.
+
+Esto suele suceder cuando estamos llegando en zona sobre todo de masilar posterior, topamos contra el piso del seno y el hueso es blando. Entonces, al topar contra el piso del seno, que está duro y el hueso ser blando, el implante patina. El implante patina y lo que hace es rotar y pierde la estabilidad, pierde el torque. 
+
+¿Qué tenemos que hacer en este caso? Tenemos que retirar el implante, pasar una fresa dos puntos, nuevamente, dos pasos inferior a la del implante. Si vamos a colocar un implante de 4, pasamos la de 2,6 y en este caso volvemos a perforar. Si es el techo del seno, no pasa nada. 
+
+Perforamos el techo del seno y volvemos a colocar el implante. Al colocar ese implante, ese implante se va a anclar en la cortical del seno y lo que va a producir es un anclaje cortical en el seno y con el paso del tiempo se producirá esa osteointegración alrededor del implante. Para mí, estas son las complicaciones más habituales intragirúrgicas.
+
+Estamos hablando que puede haber complicaciones, obviamente, propias del paciente. Me estoy refiriendo a complicaciones de la técnica o zonas de sangrado. Hay muchas veces que, vamos a ponerlo aquí, sangrado.
+
+Hay muchas veces que hay ciertas arteriolas intraosas que empiezan o pueden empezar a sangrar. No pasa nada, no debemos asustarnos. Lo único que hay que hacer es coger la anestesia e inyectar para que el vasoconstructor la pare ese sangrado y, posteriormente, cuando nosotros coloquemos nuestro implante, taponará y sellará esa arteriola intraosa.
+
+Eso no es una gran complicación. Te puede, obviamente, resultar llamativo o asustar o preocupar porque lo desconozca, lo descontroles, pero no debes preocuparte más allá de eso. Por eso necesitas conocer qué es lo que puede estar sucediendo.
+
+Pero, por tanto, no hay unas complicaciones más allá de las correspondientes siempre y cuando la técnica se realice de la manera correcta y paso a paso y no teniendo, estando siempre lo que uno hace bajo control y sabiendo qué es lo que está haciendo. Todas las demás complicaciones que puedan surgir son propias o van a ser propias del paciente. Es algo donde no podemos entrar.
+
+Eso puede ser propio del paciente, como pueden ser desmayos, síncope vasovagales, nervios, subida de tensión, hipoglucemia, etcétera, etcétera, etcétera. Ahí no vamos a entrar. Esos son más propios del paciente o de urgencias médicas, las cuales todo debemos saber.
+
+Estas son para mí las tres complicaciones intraquirúrgicas propias de la técnica que más pueden suceder. Por tanto, ya sabes qué es lo que te puede suceder, ya sabes cómo solucionarlo, así que no deberías ponerte nervioso o nerviosa a la hora de colocar un implante si tienes este tipo de complicación. Hasta aquí la última parte.
+
+Lo siguiente que vamos a ver es el resumen y final de este módulo. Así que, vamos allá.
