@@ -1,34 +1,25 @@
 import os
 import asyncio
 import aiohttp
-import json
 import time
-from typing import List, Dict, Optional, Tuple
-from django.utils import timezone
-from datetime import datetime, timedelta
+from typing import List, Dict, Tuple
 from asgiref.sync import sync_to_async
 from .models import ChatbotSession, ChatbotMessage, ChatbotConfiguration, ChatbotTraining
 from .vector_service import vector_service
 
+
 class AIService:
-    """Servicio para interactuar con APIs de IA"""
+    """Servicio para interactuar con OpenAI"""
     
     def __init__(self):
         self.max_retries = 3
         self.timeout = 30
     
-    def _get_openai_api_key(self) -> str:
+    def _get_api_key(self) -> str:
         """Obtiene la API key de OpenAI desde variables de entorno"""
         api_key = os.environ.get('OPENAI_API_KEY', '')
         if not api_key:
             raise ValueError("OPENAI_API_KEY no configurada en variables de entorno (.env)")
-        return api_key
-    
-    def _get_gemini_api_key(self) -> str:
-        """Obtiene la API key de Gemini desde variables de entorno"""
-        api_key = os.environ.get('GEMINI_API_KEY', '')
-        if not api_key:
-            raise ValueError("GEMINI_API_KEY no configurada en variables de entorno (.env)")
         return api_key
     
     async def get_system_prompt(self, user_query: str | None = None) -> str:
@@ -113,7 +104,6 @@ RESPUESTAS:
         except Exception:
             return default or ""
     
-    
     async def _get_active_trainings(self) -> List[Dict]:
         """Obtiene entrenamientos activos"""
         try:
@@ -158,11 +148,10 @@ RESPUESTAS:
     async def generate_response(
         self, 
         user_message: str, 
-        session: ChatbotSession,
-        provider: str | None = None
+        session: ChatbotSession
     ) -> Tuple[str, int, float]:
         """
-        Genera respuesta de la IA
+        Genera respuesta de la IA usando OpenAI
         
         Returns:
             Tuple[str, int, float]: (respuesta, tokens_usados, tiempo_procesamiento)
@@ -177,15 +166,7 @@ RESPUESTAS:
             messages.extend(context_messages)
             messages.append({"role": "user", "content": user_message})
             
-            # Elegir proveedor
-            provider = provider or await self._get_config_value('ai_provider', 'openai')
-            
-            if provider == 'openai':
-                response, tokens = await self._call_openai(messages)
-            elif provider == 'gemini':
-                response, tokens = await self._call_gemini(messages)
-            else:
-                raise ValueError(f"Proveedor no soportado: {provider}. Use 'openai' o 'gemini'")
+            response, tokens = await self._call_openai(messages)
             
             processing_time = time.time() - start_time
             
@@ -198,7 +179,7 @@ RESPUESTAS:
     
     async def _call_openai(self, messages: List[Dict]) -> Tuple[str, int]:
         """Llama a la API de OpenAI"""
-        api_key = self._get_openai_api_key()
+        api_key = self._get_api_key()
         
         model_name = await self._get_config_value('openai_model', 'gpt-4o-mini')
         print(f"🔍 Usando modelo OpenAI: {model_name}")
@@ -243,82 +224,7 @@ RESPUESTAS:
                         raise e
                     await asyncio.sleep(2 ** attempt)
         
-        # Esto nunca debería ejecutarse, pero satisface el type checker
         raise Exception("Error inesperado en OpenAI API")
-    
-    async def _call_gemini(self, messages: List[Dict]) -> Tuple[str, int]:
-        """Llama a la API de Google Gemini"""
-        api_key = self._get_gemini_api_key()
-        
-        model_name = await self._get_config_value('gemini_model', 'gemini-2.5-flash')
-        api_version = await self._get_config_value('gemini_api_version', 'v1')
-        print(f"🔍 Usando modelo Gemini: {model_name} (API: {api_version})")
-        
-        headers = {
-            "Content-Type": "application/json"
-        }
-        
-        # Convertir formato de mensajes para Gemini
-        system_prompt = messages[0]['content'] if messages[0]['role'] == 'system' else ""
-        conversation_messages = messages[1:] if messages[0]['role'] == 'system' else messages
-        
-        # Construir contenido para Gemini
-        contents = []
-        if system_prompt:
-            contents.append({
-                "parts": [{"text": system_prompt}],
-                "role": "user"
-            })
-            contents.append({
-                "parts": [{"text": "Entendido, actuaré como un asistente especializado en odontología."}],
-                "role": "model"
-            })
-        
-        for msg in conversation_messages:
-            contents.append({
-                "parts": [{"text": msg['content']}],
-                "role": "user" if msg['role'] == 'user' else "model"
-            })
-        
-        data = {
-            "contents": contents,
-            "generationConfig": {
-                "temperature": 0.7,
-                "maxOutputTokens": 1000,
-                "topP": 0.8,
-                "topK": 10
-            }
-        }
-        
-        async with aiohttp.ClientSession() as session:
-            for attempt in range(self.max_retries):
-                try:
-                    url = f"https://generativelanguage.googleapis.com/{api_version}/models/{model_name}:generateContent?key={api_key}"
-                    async with session.post(
-                        url,
-                        headers=headers,
-                        json=data,
-                        timeout=aiohttp.ClientTimeout(total=self.timeout)
-                    ) as response:
-                        if response.status == 200:
-                            result = await response.json()
-                            content = result['candidates'][0]['content']['parts'][0]['text']
-                            tokens = len(content.split()) * 1.3
-                            return content, int(tokens)
-                        else:
-                            error_text = await response.text()
-                            raise Exception(f"Gemini API error {response.status}: {error_text}")
-                
-                except asyncio.TimeoutError:
-                    if attempt == self.max_retries - 1:
-                        raise Exception("Timeout en Gemini API")
-                    await asyncio.sleep(2 ** attempt)
-                except Exception as e:
-                    if attempt == self.max_retries - 1:
-                        raise e
-                    await asyncio.sleep(2 ** attempt)
-        
-        raise Exception("Error inesperado en Gemini API")
 
-# Instancia global del servicio
+
 ai_service = AIService()

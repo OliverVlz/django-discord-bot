@@ -27,7 +27,7 @@ Sistema de chatbot inteligente integrado en Discord, especializado en odontolog�
 - **Contexto de conversación** (memoria de mensajes anteriores)
 - **Control de acceso por roles** de Discord
 - **Límites de uso** (diario/mensual por rol)
-- **Múltiples proveedores** de IA (OpenAI, Gemini)
+- **OpenAI** como proveedor de IA
 - **Entrenamiento personalizado** con conocimiento específico
 - **Estadísticas de uso** por usuario
 - **Sesiones automáticas** con expiración
@@ -78,31 +78,15 @@ Usuario Discord → Discord Commands → Chatbot Service → AI Service → API 
 
 ---
 
-## 🤖 Proveedores de IA
+## 🤖 Proveedor de IA
 
-### **OpenAI (GPT-4)**
+### **OpenAI**
 
-- **Modelo**: `gpt-4`
-- **API Key**: `sk-...`
+- **Modelo por defecto**: `gpt-4o-mini`
+- **Modelos disponibles**: `gpt-4o-mini`, `gpt-4o`, `gpt-4-turbo`
+- **API Key**: Configurar en `.env` como `OPENAI_API_KEY`
 - **Calidad**: ⭐⭐⭐⭐⭐ Excelente
-- **Costo**: 💰 Pago por uso
-- **Uso recomendado**: Producción, casos complejos
-
-### **Google Gemini**
-
-- **Modelo**: `gemini-pro`
-- **API Key**: `AI...`
-- **Calidad**: ⭐⭐⭐⭐ Muy buena
-- **Costo**: 🆓 Gratuito (con límites)
-- **Uso recomendado**: Desarrollo, pruebas, uso básico
-
-### **Sistema de Selección**
-
-El chatbot usa la configuración `ai_provider` para decidir qué servicio usar:
-
-- `"openai"` → Usa OpenAI GPT-4
-- `"gemini"` → Usa Google Gemini
-- Se puede cambiar dinámicamente desde el admin
+- **Costo**: 💰 Pago por uso (muy económico con gpt-4o-mini)
 
 ---
 
@@ -146,9 +130,14 @@ python manage.py setup_chatbot
 ```bash
 # .env file
 DISCORD_BOT_TOKEN=tu_token_aqui
-OPENAI_API_KEY=sk-proj-...  # Opcional
-GEMINI_API_KEY=AIzaSyB...   # Opcional
-AI_PROVIDER=openai          # openai o gemini
+OPENAI_API_KEY=sk-proj-...
+
+# Base de datos (si usas Docker con pgvector)
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5433
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DATABASE=django_discord_bot
 ```
 
 ---
@@ -171,9 +160,9 @@ _Redirige automáticamente al admin de Django_
 | ------------------------- | ------- | ---------------------------------------------------------------------------------- | -------------------- |
 | `chatbot_channel_id`      | channel | ID del canal donde funciona el bot                                                 | `123456789012345678` |
 | `default_chatbot_role_id` | general | Rol por defecto para usuarios sin rol específico (ver sección de gestión de roles) | `987654321098765432` |
-| `ai_provider`             | general | Proveedor de IA a usar                                                             | `openai` o `gemini`  |
-| `openai_api_key`          | api_key | Clave de API de OpenAI                                                             | `sk-proj-abc123...`  |
-| `gemini_api_key`          | api_key | Clave de API de Gemini                                                             | `AIzaSyB...`         |
+| `openai_model`            | general | Modelo de OpenAI a usar                                                            | `gpt-4o-mini`        |
+
+**Nota**: La API key de OpenAI se configura en el archivo `.env` como `OPENAI_API_KEY`.
 
 #### **Configuración del Sistema:**
 

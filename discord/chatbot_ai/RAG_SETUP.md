@@ -15,12 +15,8 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DATABASE=django_discord_bot
 
-# API Keys (OBLIGATORIAS - solo desde .env)
+# API Key (OBLIGATORIA - solo desde .env)
 OPENAI_API_KEY=sk-...
-GEMINI_API_KEY=...  # Opcional, solo si usas Gemini
-
-# Proveedor de IA (opcional, default: openai)
-AI_PROVIDER=openai
 ```
 
 **Nota**: Las API keys SOLO se leen desde `.env`, no desde Django Admin.
