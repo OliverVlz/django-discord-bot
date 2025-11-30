@@ -11,6 +11,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+RUN python discord/manage.py collectstatic --noinput
+
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 8000
