@@ -10,7 +10,7 @@ services:
       - POSTGRES_HOST=72.61.2.5
       - POSTGRES_PORT=5432
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres-discord-bot-2025
+      - POSTGRES_PASSWORD=*****
       - POSTGRES_DATABASE=discord-db
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
