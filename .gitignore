@@ -37,3 +37,6 @@ yarn-error.log*
 *.pot
 *.mo
 .DS_Store
+
+staticfiles/
+discord/staticfiles/
