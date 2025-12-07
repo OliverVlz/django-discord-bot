@@ -24,10 +24,8 @@ class Command(BaseCommand):
             )
             self.stdout.write("")
             self.stdout.write("Proximos pasos:")
-            self.stdout.write("1. Configurar API keys en Django Admin:")
-            self.stdout.write("   - openai_api_key: API Key de OpenAI (sk-...)")
-            self.stdout.write("   - gemini_api_key: API Key de Gemini (AIza...)")
-            self.stdout.write("   - ai_provider: Proveedor a usar (openai o gemini)")
+            self.stdout.write("1. Configurar API key de OpenAI en .env:")
+            self.stdout.write("   OPENAI_API_KEY=sk-...")
             self.stdout.write("")
             self.stdout.write("2. Actualizar configuraciones en el admin de Django:")
             self.stdout.write("   - chatbot_channel_id: ID del canal donde funcionara el bot")
@@ -51,33 +49,15 @@ class Command(BaseCommand):
         configs = [
             {
                 'name': 'chatbot_channel_id',
-                'value': '',  # Se debe configurar manualmente
+                'value': '',
                 'configuration_type': 'channel',
                 'description': 'ID del canal donde funciona el chatbot de IA'
             },
             {
                 'name': 'default_chatbot_role_id',
-                'value': '',  # Se debe configurar manualmente
+                'value': '',
                 'configuration_type': 'general',
                 'description': 'ID del rol por defecto para usuarios sin rol específico'
-            },
-            {
-                'name': 'ai_provider',
-                'value': 'openai',
-                'configuration_type': 'general',
-                'description': 'Proveedor de IA (openai, gemini)'
-            },
-            {
-                'name': 'openai_api_key',
-                'value': '',  # Se debe configurar manualmente
-                'configuration_type': 'api_key',
-                'description': 'API Key de OpenAI (sk-...)'
-            },
-            {
-                'name': 'gemini_api_key',
-                'value': '',  # Se debe configurar manualmente
-                'configuration_type': 'api_key',
-                'description': 'API Key de Google Gemini (AI...)'
             }
         ]
         

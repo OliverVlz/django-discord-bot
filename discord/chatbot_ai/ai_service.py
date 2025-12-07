@@ -1,38 +1,67 @@
 import os
 import asyncio
 import aiohttp
-import json
 import time
-from typing import List, Dict, Optional, Tuple
-from django.utils import timezone
-from datetime import datetime, timedelta
+from typing import List, Dict, Tuple
 from asgiref.sync import sync_to_async
 from .models import ChatbotSession, ChatbotMessage, ChatbotConfiguration, ChatbotTraining
+from .vector_service import vector_service
+
 
 class AIService:
-    """Servicio para interactuar con APIs de IA"""
+    """Servicio para interactuar con OpenAI"""
     
     def __init__(self):
-        self.openai_api_key = os.environ.get('OPENAI_API_KEY')
-        self.gemini_api_key = os.environ.get('GEMINI_API_KEY')
-        self.default_provider = os.environ.get('AI_PROVIDER', 'openai')
         self.max_retries = 3
         self.timeout = 30
     
-    async def get_system_prompt(self) -> str:
-        """Obtiene el prompt del sistema desde la base de datos"""
+    def _get_api_key(self) -> str:
+        """Obtiene la API key de OpenAI desde variables de entorno"""
+        api_key = os.environ.get('OPENAI_API_KEY', '')
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY no configurada en variables de entorno (.env)")
+        return api_key
+    
+    async def get_system_prompt(self, user_query: str | None = None) -> str:
+        """Obtiene el prompt del sistema con contexto RAG relevante"""
         try:
-            # Obtener prompt del sistema
-            system_prompt = await self._get_config_value('system_prompt', self._get_default_system_prompt())
+            base_prompt = await self._get_config_value('system_prompt', self._get_default_system_prompt())
             
-            # Obtener entrenamientos activos
             trainings = await self._get_active_trainings()
             
-            # Construir prompt completo
-            full_prompt = system_prompt
+            rag_context = ""
+            if user_query:
+                try:
+                    rag_context = await self._get_rag_context(user_query)
+                    if rag_context:
+                        print(f"✅ RAG: Contexto encontrado ({len(rag_context)} caracteres)")
+                    else:
+                        print("⚠️ RAG: No se encontró contexto relevante")
+                except Exception as e:
+                    print(f"❌ Error obteniendo contexto RAG: {e}")
+            
+            if rag_context:
+                full_prompt = f"""{rag_context}
+
+---
+
+## INSTRUCCIONES CRÍTICAS:
+
+La información anterior proviene DIRECTAMENTE de los cursos oficiales IMAX (Launch y Pro). 
+DEBES usar esta información como BASE PRINCIPAL y ÚNICA para responder. 
+
+REGLAS:
+1. Si el contexto IMAX menciona algo específico (ej: "no antiagregado ni anticoagulado"), DEBES incluirlo
+2. NO uses conocimiento general si el contexto IMAX ya lo cubre
+3. Menciona que la información proviene de IMAX cuando sea relevante
+4. El contexto IMAX tiene PRIORIDAD ABSOLUTA sobre cualquier otro conocimiento
+
+{base_prompt}"""
+            else:
+                full_prompt = base_prompt
             
             if trainings:
-                full_prompt += "\n\n## Información Adicional:\n"
+                full_prompt += "\n\n## Reglas Adicionales:\n"
                 for training in trainings:
                     full_prompt += f"\n### {training['name']}\n{training['content']}\n"
             
@@ -42,29 +71,27 @@ class AIService:
             print(f"Error obteniendo system prompt: {e}")
             return self._get_default_system_prompt()
     
+    async def _get_rag_context(self, query: str, limit: int = 5) -> str:
+        """Obtiene contexto relevante usando búsqueda vectorial RAG"""
+        try:
+            chunks = await vector_service.search_similar_chunks(query, limit=limit)
+            
+            if not chunks:
+                return ""
+            
+            return vector_service.format_context_for_llm(chunks)
+            
+        except Exception as e:
+            print(f"Error en búsqueda RAG: {e}")
+            return ""
+    
     def _get_default_system_prompt(self) -> str:
         """Prompt por defecto del sistema"""
-        return """Eres un asistente de IA especializado en odontología y la comunidad IMAX. 
+        return """Eres un asistente de IA especializado en odontología y la comunidad IMAX.
 
-CARACTERÍSTICAS:
-- Eres experto en odontología, tratamientos, procedimientos y mejores prácticas
-- Respondes de manera profesional pero amigable
-- Mantienes un tono educativo y constructivo
-- Siempre recomiendas consultar con profesionales cuando sea necesario
-- Respetas las reglas de la comunidad IMAX
-
-REGLAS IMPORTANTES:
-1. NUNCA proporciones diagnósticos médicos específicos
-2. Siempre recomienda consultar con un dentista profesional para casos específicos
-3. Mantén las conversaciones educativas y constructivas
-4. Respeta los diferentes niveles de conocimiento de los usuarios
-5. Si no estás seguro de algo, dilo claramente
-
-RESPUESTAS:
-- Sé conciso pero completo
-- Usa emojis moderadamente
-- Incluye referencias cuando sea apropiado
-- Mantén un tono profesional pero accesible"""
+Responde a las preguntas basándote ÚNICAMENTE en el contexto proporcionado cuando esté disponible.
+Si hay contexto de IMAX, úsalo como base principal para tu respuesta.
+Sé profesional, educativo y amigable. Siempre recomienda consultar con profesionales para casos específicos."""
 
     async def _get_config_value(self, name: str, default: str | None = None) -> str:
         """Obtiene un valor de configuración desde ChatbotConfiguration"""
@@ -81,23 +108,6 @@ RESPUESTAS:
             return bot_config.value if bot_config else (default or "")
         except Exception:
             return default or ""
-    
-    async def _get_api_key_from_config(self, provider: str) -> str:
-        """Obtiene la API key desde ChatbotConfiguration"""
-        try:
-            config_name = f"{provider}_api_key"
-            config = await sync_to_async(
-                lambda: ChatbotConfiguration.objects.filter(name=config_name, is_active=True).first()
-            )()
-            if config:
-                return config.value
-            from invitation_roles.models import BotConfiguration
-            bot_config = await sync_to_async(
-                lambda: BotConfiguration.objects.filter(name=config_name, is_active=True).first()
-            )()
-            return bot_config.value if bot_config else ""
-        except Exception:
-            return ""
     
     async def _get_active_trainings(self) -> List[Dict]:
         """Obtiene entrenamientos activos"""
@@ -143,11 +153,10 @@ RESPUESTAS:
     async def generate_response(
         self, 
         user_message: str, 
-        session: ChatbotSession,
-        provider: str | None = None
+        session: ChatbotSession
     ) -> Tuple[str, int, float]:
         """
-        Genera respuesta de la IA
+        Genera respuesta de la IA usando OpenAI
         
         Returns:
             Tuple[str, int, float]: (respuesta, tokens_usados, tiempo_procesamiento)
@@ -155,24 +164,40 @@ RESPUESTAS:
         start_time = time.time()
         
         try:
-            # Obtener prompt del sistema y contexto
-            system_prompt = await self.get_system_prompt()
+            base_system_prompt = await self._get_config_value('system_prompt', self._get_default_system_prompt())
+            trainings = await self._get_active_trainings()
+            
+            rag_context = ""
+            if user_message:
+                try:
+                    rag_context = await self._get_rag_context(user_message)
+                    if rag_context:
+                        print(f"✅ RAG: Contexto encontrado ({len(rag_context)} caracteres)")
+                    else:
+                        print("⚠️ RAG: No se encontró contexto relevante")
+                except Exception as e:
+                    print(f"❌ Error obteniendo contexto RAG: {e}")
+            
+            system_content = base_system_prompt
+            if trainings:
+                system_content += "\n\n## Reglas Adicionales:\n"
+                for training in trainings:
+                    system_content += f"\n### {training['name']}\n{training['content']}\n"
+            
             context_messages = await self.get_context_messages(session)
+            print(f"📝 Contexto: {len(context_messages)} mensajes previos en historial")
             
-            # Construir mensajes para la API
-            messages = [{"role": "system", "content": system_prompt}]
+            messages = [{"role": "system", "content": system_content}]
             messages.extend(context_messages)
-            messages.append({"role": "user", "content": user_message})
             
-            # Elegir proveedor
-            provider = provider or await self._get_config_value('ai_provider', 'openai')
-            
-            if provider == 'openai':
-                response, tokens = await self._call_openai(messages)
-            elif provider == 'gemini':
-                response, tokens = await self._call_gemini(messages)
+            if rag_context:
+                user_content = f"Contexto:\n{rag_context}\n\nPregunta: {user_message}"
             else:
-                raise ValueError(f"Proveedor no soportado: {provider}. Use 'openai' o 'gemini'")
+                user_content = user_message
+            
+            messages.append({"role": "user", "content": user_content})
+            
+            response, tokens = await self._call_openai(messages)
             
             processing_time = time.time() - start_time
             
@@ -185,9 +210,7 @@ RESPUESTAS:
     
     async def _call_openai(self, messages: List[Dict]) -> Tuple[str, int]:
         """Llama a la API de OpenAI"""
-        api_key = await self._get_api_key_from_config('openai') or self.openai_api_key
-        if not api_key:
-            raise ValueError("OpenAI API key no configurada. Configúrala en Django Admin (openai_api_key) o en .env (OPENAI_API_KEY)")
+        api_key = self._get_api_key()
         
         model_name = await self._get_config_value('openai_model', 'gpt-4o-mini')
         print(f"🔍 Usando modelo OpenAI: {model_name}")
@@ -201,7 +224,7 @@ RESPUESTAS:
             "model": model_name,
             "messages": messages,
             "max_tokens": 1000,
-            "temperature": 0.7,
+            "temperature": 0.3,
             "stream": False
         }
         
@@ -232,84 +255,7 @@ RESPUESTAS:
                         raise e
                     await asyncio.sleep(2 ** attempt)
         
-        # Esto nunca debería ejecutarse, pero satisface el type checker
         raise Exception("Error inesperado en OpenAI API")
-    
-    async def _call_gemini(self, messages: List[Dict]) -> Tuple[str, int]:
-        """Llama a la API de Google Gemini"""
-        api_key = await self._get_api_key_from_config('gemini') or self.gemini_api_key
-        if not api_key:
-            raise ValueError("Gemini API key no configurada. Configúrala en Django Admin (gemini_api_key) o en .env (GEMINI_API_KEY)")
-        
-        model_name = await self._get_config_value('gemini_model', 'gemini-2.5-flash')
-        api_version = await self._get_config_value('gemini_api_version', 'v1')
-        print(f"🔍 Usando modelo Gemini: {model_name} (API: {api_version})")
-        
-        headers = {
-            "Content-Type": "application/json"
-        }
-        
-        # Convertir formato de mensajes para Gemini
-        system_prompt = messages[0]['content'] if messages[0]['role'] == 'system' else ""
-        conversation_messages = messages[1:] if messages[0]['role'] == 'system' else messages
-        
-        # Construir contenido para Gemini
-        contents = []
-        if system_prompt:
-            contents.append({
-                "parts": [{"text": system_prompt}],
-                "role": "user"
-            })
-            contents.append({
-                "parts": [{"text": "Entendido, actuaré como un asistente especializado en odontología."}],
-                "role": "model"
-            })
-        
-        for msg in conversation_messages:
-            contents.append({
-                "parts": [{"text": msg['content']}],
-                "role": "user" if msg['role'] == 'user' else "model"
-            })
-        
-        data = {
-            "contents": contents,
-            "generationConfig": {
-                "temperature": 0.7,
-                "maxOutputTokens": 1000,
-                "topP": 0.8,
-                "topK": 10
-            }
-        }
-        
-        async with aiohttp.ClientSession() as session:
-            for attempt in range(self.max_retries):
-                try:
-                    url = f"https://generativelanguage.googleapis.com/{api_version}/models/{model_name}:generateContent?key={api_key}"
-                    async with session.post(
-                        url,
-                        headers=headers,
-                        json=data,
-                        timeout=aiohttp.ClientTimeout(total=self.timeout)
-                    ) as response:
-                        if response.status == 200:
-                            result = await response.json()
-                            content = result['candidates'][0]['content']['parts'][0]['text']
-                            tokens = len(content.split()) * 1.3
-                            return content, int(tokens)
-                        else:
-                            error_text = await response.text()
-                            raise Exception(f"Gemini API error {response.status}: {error_text}")
-                
-                except asyncio.TimeoutError:
-                    if attempt == self.max_retries - 1:
-                        raise Exception("Timeout en Gemini API")
-                    await asyncio.sleep(2 ** attempt)
-                except Exception as e:
-                    if attempt == self.max_retries - 1:
-                        raise e
-                    await asyncio.sleep(2 ** attempt)
-        
-        raise Exception("Error inesperado en Gemini API")
 
-# Instancia global del servicio
+
 ai_service = AIService()

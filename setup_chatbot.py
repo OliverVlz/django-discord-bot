@@ -59,34 +59,9 @@ def setup_chatbot_configurations():
     
     configs = [
         {
-            'name': 'openai_api_key',
-            'value': '',
-            'description': 'API Key de OpenAI (sk-...) - Configurar en Django Admin'
-        },
-        {
-            'name': 'gemini_api_key',
-            'value': '',
-            'description': 'API Key de Google Gemini (AIza...) - Configurar en Django Admin'
-        },
-        {
-            'name': 'ai_provider',
-            'value': 'openai',
-            'description': 'Proveedor de IA (openai, gemini)'
-        },
-        {
             'name': 'openai_model',
             'value': 'gpt-4o-mini',
-            'description': 'Modelo de OpenAI a usar (gpt-4o-mini, gpt-4o, etc.)'
-        },
-        {
-            'name': 'gemini_model',
-            'value': 'gemini-2.5-flash',
-            'description': 'Modelo de Gemini a usar (gemini-2.5-flash, gemini-2.0-flash, etc.)'
-        },
-        {
-            'name': 'gemini_api_version',
-            'value': 'v1',
-            'description': 'Version de la API de Gemini (v1, v1beta)'
+            'description': 'Modelo de OpenAI a usar (gpt-4o-mini, gpt-4o, gpt-4-turbo, etc.)'
         }
     ]
     
@@ -274,11 +249,8 @@ def main():
         print("Configuracion completada!")
         print()
         print("Proximos pasos:")
-        print("1. Configurar API keys en Django Admin:")
-        print("   - Ve a Django Admin -> Chatbot_Ai -> Configuraciones Chatbot")
-        print("   - Edita 'openai_api_key' y pon tu API key de OpenAI (sk-...)")
-        print("   - Edita 'gemini_api_key' y pon tu API key de Gemini (AIza...)")
-        print("   - Edita 'ai_provider' y elige 'openai' o 'gemini'")
+        print("1. Configurar API key de OpenAI en .env:")
+        print("   OPENAI_API_KEY=sk-...")
         print()
         print("2. Actualizar configuraciones en el admin de Django:")
         print("   - chatbot_channel_id: ID del canal donde funcionara el bot")
