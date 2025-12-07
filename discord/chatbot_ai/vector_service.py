@@ -88,47 +88,57 @@ class VectorService:
     ) -> List[Dict]:
         """Busca los chunks más similares a una consulta"""
         from .models import ChatbotKnowledgeChunk
+        from django.db import OperationalError, ProgrammingError
         
-        query_embedding = await self.create_embedding(query)
-        
-        def search_db():
-            queryset = ChatbotKnowledgeChunk.objects.all()
+        try:
+            query_embedding = await self.create_embedding(query)
             
-            if course_filter:
-                queryset = queryset.filter(course=course_filter)
+            def search_db():
+                try:
+                    queryset = ChatbotKnowledgeChunk.objects.all()
+                    
+                    if course_filter:
+                        queryset = queryset.filter(course=course_filter)
+                    
+                    results = queryset.annotate(
+                        distance=CosineDistance('embedding', query_embedding)
+                    ).order_by('distance')[:limit]
+                    
+                    return [
+                        {
+                            'content': chunk.content,
+                            'source_file': chunk.source_file,
+                            'course': chunk.get_course_display(),
+                            'module': chunk.module,
+                            'distance': chunk.distance,
+                            'similarity': 1 - chunk.distance
+                        }
+                        for chunk in results
+                    ]
+                except (OperationalError, ProgrammingError) as e:
+                    if 'no existe la relación' in str(e) or 'does not exist' in str(e) or 'vector' in str(e).lower():
+                        return []
+                    raise
             
-            results = queryset.annotate(
-                distance=CosineDistance('embedding', query_embedding)
-            ).order_by('distance')[:limit]
-            
-            return [
-                {
-                    'content': chunk.content,
-                    'source_file': chunk.source_file,
-                    'course': chunk.get_course_display(),
-                    'module': chunk.module,
-                    'distance': chunk.distance,
-                    'similarity': 1 - chunk.distance
-                }
-                for chunk in results
-            ]
-        
-        return await sync_to_async(search_db)()
+            return await sync_to_async(search_db)()
+        except Exception as e:
+            if 'no existe la relación' in str(e) or 'does not exist' in str(e) or 'vector' in str(e).lower():
+                return []
+            raise
     
     def format_context_for_llm(self, chunks: List[Dict]) -> str:
         """Formatea los chunks encontrados como contexto para el LLM"""
         if not chunks:
             return ""
         
-        context_parts = ["## Información Relevante de IMAX:\n"]
+        context_parts = []
         
         for i, chunk in enumerate(chunks, 1):
             context_parts.append(
-                f"### Fuente {i}: {chunk['course']} - {chunk['module']}\n"
-                f"{chunk['content']}\n"
+                f"[{chunk['course']} - {chunk['module']}]\n{chunk['content']}"
             )
         
-        return "\n".join(context_parts)
+        return "\n\n".join(context_parts)
 
 
 vector_service = VectorService()

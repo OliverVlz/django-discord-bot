@@ -25,24 +25,45 @@ class AIService:
     async def get_system_prompt(self, user_query: str | None = None) -> str:
         """Obtiene el prompt del sistema con contexto RAG relevante"""
         try:
-            system_prompt = await self._get_config_value('system_prompt', self._get_default_system_prompt())
+            base_prompt = await self._get_config_value('system_prompt', self._get_default_system_prompt())
             
             trainings = await self._get_active_trainings()
             
-            full_prompt = system_prompt
+            rag_context = ""
+            if user_query:
+                try:
+                    rag_context = await self._get_rag_context(user_query)
+                    if rag_context:
+                        print(f"✅ RAG: Contexto encontrado ({len(rag_context)} caracteres)")
+                    else:
+                        print("⚠️ RAG: No se encontró contexto relevante")
+                except Exception as e:
+                    print(f"❌ Error obteniendo contexto RAG: {e}")
+            
+            if rag_context:
+                full_prompt = f"""{rag_context}
+
+---
+
+## INSTRUCCIONES CRÍTICAS:
+
+La información anterior proviene DIRECTAMENTE de los cursos oficiales IMAX (Launch y Pro). 
+DEBES usar esta información como BASE PRINCIPAL y ÚNICA para responder. 
+
+REGLAS:
+1. Si el contexto IMAX menciona algo específico (ej: "no antiagregado ni anticoagulado"), DEBES incluirlo
+2. NO uses conocimiento general si el contexto IMAX ya lo cubre
+3. Menciona que la información proviene de IMAX cuando sea relevante
+4. El contexto IMAX tiene PRIORIDAD ABSOLUTA sobre cualquier otro conocimiento
+
+{base_prompt}"""
+            else:
+                full_prompt = base_prompt
             
             if trainings:
                 full_prompt += "\n\n## Reglas Adicionales:\n"
                 for training in trainings:
                     full_prompt += f"\n### {training['name']}\n{training['content']}\n"
-            
-            if user_query:
-                try:
-                    rag_context = await self._get_rag_context(user_query)
-                    if rag_context:
-                        full_prompt += f"\n\n{rag_context}"
-                except Exception as e:
-                    print(f"Error obteniendo contexto RAG: {e}")
             
             return full_prompt
             
@@ -66,27 +87,11 @@ class AIService:
     
     def _get_default_system_prompt(self) -> str:
         """Prompt por defecto del sistema"""
-        return """Eres un asistente de IA especializado en odontología y la comunidad IMAX. 
+        return """Eres un asistente de IA especializado en odontología y la comunidad IMAX.
 
-CARACTERÍSTICAS:
-- Eres experto en odontología, tratamientos, procedimientos y mejores prácticas
-- Respondes de manera profesional pero amigable
-- Mantienes un tono educativo y constructivo
-- Siempre recomiendas consultar con profesionales cuando sea necesario
-- Respetas las reglas de la comunidad IMAX
-
-REGLAS IMPORTANTES:
-1. NUNCA proporciones diagnósticos médicos específicos
-2. Siempre recomienda consultar con un dentista profesional para casos específicos
-3. Mantén las conversaciones educativas y constructivas
-4. Respeta los diferentes niveles de conocimiento de los usuarios
-5. Si no estás seguro de algo, dilo claramente
-
-RESPUESTAS:
-- Sé conciso pero completo
-- Usa emojis moderadamente
-- Incluye referencias cuando sea apropiado
-- Mantén un tono profesional pero accesible"""
+Responde a las preguntas basándote ÚNICAMENTE en el contexto proporcionado cuando esté disponible.
+Si hay contexto de IMAX, úsalo como base principal para tu respuesta.
+Sé profesional, educativo y amigable. Siempre recomienda consultar con profesionales para casos específicos."""
 
     async def _get_config_value(self, name: str, default: str | None = None) -> str:
         """Obtiene un valor de configuración desde ChatbotConfiguration"""
@@ -159,12 +164,38 @@ RESPUESTAS:
         start_time = time.time()
         
         try:
-            system_prompt = await self.get_system_prompt(user_query=user_message)
-            context_messages = await self.get_context_messages(session)
+            base_system_prompt = await self._get_config_value('system_prompt', self._get_default_system_prompt())
+            trainings = await self._get_active_trainings()
             
-            messages = [{"role": "system", "content": system_prompt}]
+            rag_context = ""
+            if user_message:
+                try:
+                    rag_context = await self._get_rag_context(user_message)
+                    if rag_context:
+                        print(f"✅ RAG: Contexto encontrado ({len(rag_context)} caracteres)")
+                    else:
+                        print("⚠️ RAG: No se encontró contexto relevante")
+                except Exception as e:
+                    print(f"❌ Error obteniendo contexto RAG: {e}")
+            
+            system_content = base_system_prompt
+            if trainings:
+                system_content += "\n\n## Reglas Adicionales:\n"
+                for training in trainings:
+                    system_content += f"\n### {training['name']}\n{training['content']}\n"
+            
+            context_messages = await self.get_context_messages(session)
+            print(f"📝 Contexto: {len(context_messages)} mensajes previos en historial")
+            
+            messages = [{"role": "system", "content": system_content}]
             messages.extend(context_messages)
-            messages.append({"role": "user", "content": user_message})
+            
+            if rag_context:
+                user_content = f"Contexto:\n{rag_context}\n\nPregunta: {user_message}"
+            else:
+                user_content = user_message
+            
+            messages.append({"role": "user", "content": user_content})
             
             response, tokens = await self._call_openai(messages)
             
@@ -193,7 +224,7 @@ RESPUESTAS:
             "model": model_name,
             "messages": messages,
             "max_tokens": 1000,
-            "temperature": 0.7,
+            "temperature": 0.3,
             "stream": False
         }
         

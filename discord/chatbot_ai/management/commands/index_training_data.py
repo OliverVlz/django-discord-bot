@@ -43,7 +43,7 @@ class Command(BaseCommand):
         
         if options['clear'] and not options['dry_run']:
             count = await asyncio.to_thread(ChatbotKnowledgeChunk.objects.all().delete)
-            self.stdout.write(self.style.WARNING(f'Eliminados {count[0]} chunks existentes'))
+            self.stdout.write(self.style.WARNING(f'[INFO] Eliminados {count[0]} chunks existentes'))
         
         txt_files = list(training_dir.rglob('*.txt'))
         self.stdout.write(f'Encontrados {len(txt_files)} archivos .txt')
@@ -60,16 +60,31 @@ class Command(BaseCommand):
                 course = self._detect_course(file_path, training_dir)
                 module = self._extract_module(file_path.name)
                 
-                content = file_path.read_text(encoding='utf-8')
+                try:
+                    content = file_path.read_text(encoding='utf-8')
+                except UnicodeDecodeError:
+                    try:
+                        content = file_path.read_text(encoding='utf-8-sig')
+                    except:
+                        try:
+                            content = file_path.read_text(encoding='latin-1')
+                        except:
+                            self.stdout.write(f'  [SKIP] No se pudo leer: {file_path.name.encode("ascii", "ignore").decode("ascii")}')
+                            continue
+                
+                if not content or not content.strip():
+                    continue
+                    
                 chunks = self._split_into_chunks(content)
                 
                 if not chunks:
-                    self.stdout.write(f'  ⚠️ Sin contenido: {file_path.name}')
+                    self.stdout.write(f'  [WARN] Sin contenido: {file_path.name}')
                     continue
                 
                 chunk_texts = [c['text'] for c in chunks]
                 
-                self.stdout.write(f'  📄 {file_path.name}: {len(chunks)} chunks')
+                safe_name = file_path.name.encode('ascii', 'ignore').decode('ascii')
+                self.stdout.write(f'  [OK] {safe_name}: {len(chunks)} chunks')
                 
                 batch_size = 20
                 for i in range(0, len(chunk_texts), batch_size):
@@ -78,11 +93,12 @@ class Command(BaseCommand):
                     
                     for j, embedding in enumerate(embeddings):
                         chunk_data = chunks[i + j]
+                        safe_filename = file_path.name.encode('utf-8', 'replace').decode('utf-8', 'replace')
                         await asyncio.to_thread(
                             ChatbotKnowledgeChunk.objects.create,
                             content=chunk_data['text'],
                             embedding=embedding,
-                            source_file=file_path.name,
+                            source_file=safe_filename,
                             course=course,
                             module=module,
                             chunk_index=i + j,
@@ -93,14 +109,15 @@ class Command(BaseCommand):
                     total_chunks += len(batch)
                 
             except Exception as e:
-                self.stderr.write(self.style.ERROR(f'  ❌ Error en {file_path.name}: {e}'))
+                safe_name = file_path.name.encode('ascii', 'ignore').decode('ascii')
+                self.stderr.write(self.style.ERROR(f'  [ERROR] Error en {safe_name}: {str(e)[:100]}'))
         
         self.stdout.write(self.style.SUCCESS(
-            f'\n✅ Indexación completada: {total_chunks} chunks, ~{total_tokens} tokens'
+            f'\n[SUCCESS] Indexacion completada: {total_chunks} chunks, ~{total_tokens} tokens'
         ))
         
         estimated_cost = (total_tokens / 1_000_000) * 0.02
-        self.stdout.write(f'💰 Costo estimado de embeddings: ${estimated_cost:.4f}')
+        self.stdout.write(f'[INFO] Costo estimado de embeddings: ${estimated_cost:.4f}')
     
     def _detect_course(self, file_path: Path, base_dir: Path) -> str:
         """Detecta el curso basado en la ruta del archivo"""
