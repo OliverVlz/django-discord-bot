@@ -216,6 +216,29 @@ Ver `requirements.txt` para lista completa.
 
 ---
 
+## 🔄 Actualizar Mensajes Fijos del Chatbot
+
+Si editas el código del mensaje fijo del chatbot y necesitas actualizarlo en Discord:
+
+### Opción 1: Reiniciar en Dokploy (Recomendado)
+
+1. Ve a tu aplicación en Dokploy
+2. Haz clic en **"Restart"** o **"Reiniciar"**
+3. Espera a que el bot se reinicie
+4. El mensaje fijo se enviará automáticamente con el contenido actualizado
+
+### Opción 2: Usar Comando en Discord
+
+Si eres administrador, puedes usar el comando directamente:
+
+1. Ve al canal del chatbot en Discord
+2. Escribe: `!ai_pin`
+3. El bot eliminará mensajes fijos antiguos y creará uno nuevo con el contenido actualizado
+
+**Nota**: El comando `!ai_pin` requiere permisos de **Administrator** en Discord.
+
+---
+
 ## 🆘 Soporte
 
 ### Recursos
