@@ -313,12 +313,6 @@ class ChatbotCog(commands.Cog):
                 )
                 
                 welcome_embed.add_field(
-                    name="🎭 Límites por Rol",
-                    value="• **VIP**: 50 mensajes/día\n• **Premium**: 30 mensajes/día\n• **Básico**: 10 mensajes/día\n\nUsa `!ai_stats` para ver tu uso",
-                    inline=False
-                )
-                
-                welcome_embed.add_field(
                     name="⚠️ Recordatorio",
                     value="• No reemplaza consulta profesional\n• Siempre consulta con tu dentista\n• Respeta las reglas del servidor",
                     inline=False
@@ -390,12 +384,6 @@ class ChatbotCog(commands.Cog):
             info_embed.add_field(
                 name="💬 Cómo usar",
                 value="1. Haz clic en el botón **\"💬 Iniciar Chat con IA\"**\n2. Revisa tus mensajes privados (DMs)\n3. Escribe tu pregunta en el chat privado\n4. La IA te responderá de forma privada",
-                inline=False
-            )
-            
-            info_embed.add_field(
-                name="🎭 Límites por Rol",
-                value="• **VIP**: 50 mensajes/día\n• **Premium**: 30 mensajes/día\n• **Básico**: 10 mensajes/día\n\nUsa `!ai_stats` para ver tu uso",
                 inline=False
             )
             
@@ -559,12 +547,6 @@ class ChatbotCog(commands.Cog):
         )
         
         embed.add_field(
-            name="🎭 Límites por Rol",
-            value="• **VIP**: 50 mensajes/día\n• **Premium**: 30 mensajes/día\n• **Básico**: 10 mensajes/día\n\nUsa `!ai_stats` para ver tu uso",
-            inline=False
-        )
-        
-        embed.add_field(
             name="⚠️ Recordatorio",
             value="• No reemplaza consulta profesional\n• Siempre consulta con tu dentista\n• Respeta las reglas del servidor",
             inline=False
@@ -600,12 +582,6 @@ class ChatbotCog(commands.Cog):
             info_embed.add_field(
                 name="💬 Cómo usar",
                 value="1. Haz clic en el botón **\"💬 Iniciar Chat con IA\"**\n2. Revisa tus mensajes privados (DMs)\n3. Escribe tu pregunta en el chat privado\n4. La IA te responderá de forma privada",
-                inline=False
-            )
-            
-            info_embed.add_field(
-                name="🎭 Límites por Rol",
-                value="• **VIP**: 50 mensajes/día\n• **Premium**: 30 mensajes/día\n• **Básico**: 10 mensajes/día\n\nUsa `!ai_stats` para ver tu uso",
                 inline=False
             )
             
