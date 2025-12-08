@@ -1068,21 +1068,43 @@ def send_discord_invite_email(email, product, subscription=None):
             print('No se pudo generar un enlace de invitacion valido.')
             return False
 
-        subject = f"Bienvenido a {product.product_name}! - Acceso a Discord"
+        subject = f"Bienvenido a IMAX - Acceso a la Comunidad de Discord"
         plain_body = (
-            "Hola!\n\n"
-            f"Tu compra de {product.product_name} ha sido aprobada exitosamente.\n\n"
-            f"Aqui tienes tu enlace de invitacion unico a nuestro servidor de Discord: {invite_url}\n\n"
+            "Bienvenido a IMAX.\n\n"
+            "Aqui tienes el enlace para acceso a la comunidad de alumnos en Discord, "
+            "donde tendras acceso personalizado segun el nivel de programa al que hayas entrado.\n\n"
+            f"Enlace de invitacion: {invite_url}\n\n"
             "Este enlace es de un solo uso y te asignara automaticamente los permisos correctos.\n\n"
+            "Si no tienes Discord instalado, puedes descargarlo aqui:\n"
+            "Android: https://play.google.com/store/apps/details?id=com.discord&hl=es\n"
+            "iOS: https://apps.apple.com/es/app/discord-juega-y-pasa-el-rato/id985746746\n"
+            "Descarga general: https://discord.com/download\n\n"
             "Te esperamos en la comunidad!"
         )
         html_body = (
-            f'<h2>Hola!</h2>'
-            f'<p>Tu compra de <strong>{product.product_name}</strong> ha sido aprobada exitosamente.</p>'
-            f'<p>Aqui tienes tu enlace de invitacion unico a nuestro servidor de Discord:</p>'
-            f'<p><a href="{invite_url}" style="background-color: #5865F2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">Unirme al Servidor de Discord</a></p>'
-            '<p>Este enlace es de un solo uso y te asignara automaticamente los permisos correctos.</p>'
-            '<p>Te esperamos en la comunidad!</p>'
+            '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">'
+            '<h2 style="color: #333;">Bienvenido a IMAX</h2>'
+            '<p style="color: #666; line-height: 1.6;">'
+            'Aqui tienes el enlace para acceso a la comunidad de alumnos en Discord, '
+            'donde tendras acceso personalizado segun el nivel de programa al que hayas entrado.'
+            '</p>'
+            f'<p style="text-align: center; margin: 30px 0;">'
+            f'<a href="{invite_url}" style="background-color: #5865F2; color: white; padding: 15px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; font-size: 16px;">ENTRAR AHORA A LA COMUNIDAD</a>'
+            '</p>'
+            '<p style="color: #666; font-size: 12px; margin-top: 30px;">'
+            'Este enlace es de un solo uso y te asignara automaticamente los permisos correctos.'
+            '</p>'
+            '<hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">'
+            '<p style="color: #666; font-size: 14px; margin-bottom: 10px;">'
+            '<strong>¿No tienes Discord instalado?</strong>'
+            '</p>'
+            '<p style="color: #666; font-size: 14px; line-height: 1.8;">'
+            '<a href="https://play.google.com/store/apps/details?id=com.discord&hl=es" style="color: #5865F2; text-decoration: none; margin-right: 15px;">📱 Descargar para Android</a><br>'
+            '<a href="https://apps.apple.com/es/app/discord-juega-y-pasa-el-rato/id985746746" style="color: #5865F2; text-decoration: none; margin-right: 15px;">📱 Descargar para iOS</a><br>'
+            '<a href="https://discord.com/download" style="color: #5865F2; text-decoration: none;">💻 Descargar para PC/Mac</a>'
+            '</p>'
+            '<p style="color: #666; margin-top: 30px;">Te esperamos en la comunidad!</p>'
+            '</div>'
         )
         send_email_message(email, subject, html_body, plain_body)
         print(f"Correo de invitacion enviado a {email}")
