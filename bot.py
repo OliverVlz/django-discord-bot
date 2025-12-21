@@ -7,6 +7,7 @@ import sys # Importar sys
 import django
 from django.conf import settings
 from django.utils import timezone
+from django.db import transaction
 
 import discord
 from discord.ext import commands
@@ -20,7 +21,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'disc
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'discord.discord.settings') # Corregido
 django.setup()
 
-from invitation_roles.models import Invite, AccessRole, BotConfiguration, HotmartSubscription
+from invitation_roles.models import Invite, AccessRole, BotConfiguration, HotmartSubscription, SharedInviteLink, SharedInviteRedemption
 from chatbot_ai.discord_commands import setup as setup_chatbot
 
 # --- Helper Functions ---
@@ -115,12 +116,9 @@ class AcceptRulesView(View):
         # Diferir la respuesta inmediatamente para evitar timeouts con múltiples clics
         await interaction.response.defer(ephemeral=True)
         
-        # Verificar si el usuario ya tiene el rol asignado o no hay una invitación pendiente
         try:
-            invite_entry = await sync_to_async(Invite.objects.get)(
-                member_id=str(interaction.user.id),
-                status='PENDING_VERIFICATION'
-            )
+            invite_entry = await sync_to_async(Invite.objects.get)(member_id=str(interaction.user.id), status='PENDING_VERIFICATION')
+            shared_redemption = None
             
             guild = interaction.guild
             if not guild:
@@ -167,6 +165,58 @@ class AcceptRulesView(View):
                 print(f"Rol con ID {role_id_str} no encontrado en el servidor Discord para {member.name}.")
             
         except Invite.DoesNotExist:
+            invite_entry = None
+            try:
+                shared_redemption = await sync_to_async(
+                    lambda: SharedInviteRedemption.objects.select_related('link')
+                    .filter(member_id=str(interaction.user.id), status='PENDING_VERIFICATION')
+                    .order_by('-created_at')
+                    .first()
+                )()
+            except SharedInviteRedemption.DoesNotExist:
+                shared_redemption = None
+
+            if shared_redemption:
+                guild = interaction.guild
+                if not guild:
+                    await interaction.followup.send("Error: No se pudo encontrar el servidor.", ephemeral=True)
+                    return
+
+                member = guild.get_member(interaction.user.id)
+                if not member:
+                    await interaction.followup.send("Error: No se pudo encontrar a su miembro en el servidor.", ephemeral=True)
+                    return
+
+                role_id_str = shared_redemption.link.role_id
+                role = guild.get_role(int(role_id_str))
+
+                if role:
+                    bot_member = guild.me
+                    if role.position >= bot_member.top_role.position:
+                        await interaction.followup.send(f"No se pudo asignar el rol {role.name}. El rol del bot es igual o inferior al rol a asignar.", ephemeral=True)
+                        return
+
+                    await member.add_roles(role)
+
+                    presentation_channel_id = await get_bot_config('presentation_channel_id')
+                    presentation_mention = f"<#{presentation_channel_id}>" if presentation_channel_id else "canal de presentaciones"
+
+                    welcome_message = f"""🎉 ¡Felicidades! Has aceptado las reglas de la Comunidad IMAX y ahora tienes acceso a los canales.
+
+¡Bienvenido oficialmente a nuestra comunidad! 🦷✨
+
+👋 **Siguiente paso:** Te invitamos a presentarte en {presentation_mention} para que la comunidad pueda conocerte mejor."""
+
+                    await interaction.followup.send(welcome_message, ephemeral=True)
+                    print(f"Rol {role.name} asignado a {member.name} después de aceptar las reglas (link compartido).")
+
+                    shared_redemption.status = 'USED'
+                    shared_redemption.used_at = timezone.now()
+                    await sync_to_async(shared_redemption.save)()
+                else:
+                    await interaction.followup.send(f"Error: El rol con ID {role_id_str} no se encontró en el servidor.", ephemeral=True)
+                return
+
             # No hay invitación PENDING_VERIFICATION, verificar si ya tiene rol activo
             guild = interaction.guild
             member = guild.get_member(interaction.user.id) if guild else None
@@ -602,16 +652,56 @@ async def on_member_join(member):
 
     # Verificar en la base de datos de Django
     try:
-        # Envolver operaciones de DB en sync_to_async
-        invite_entry = await sync_to_async(Invite.objects.get)(invite_code=used_code)
-        
-        # Actualizar la entrada de la invitación para marcarla como pendiente de verificación
-        invite_entry.status = 'PENDING_VERIFICATION'
-        invite_entry.member_id = str(member.id)
-        invite_entry.rule_message_id = await get_bot_config('rules_message_id')
-        invite_entry.rule_channel_id = await get_bot_config('rules_channel_id')
-        await sync_to_async(invite_entry.save)()
-        print(f"Invite {used_code} marcado como PENDING_VERIFICATION para miembro {member.name}.")
+        marked_pending = False
+
+        try:
+            invite_entry = await sync_to_async(Invite.objects.get)(invite_code=used_code)
+
+            invite_entry.status = 'PENDING_VERIFICATION'
+            invite_entry.member_id = str(member.id)
+            invite_entry.rule_message_id = await get_bot_config('rules_message_id')
+            invite_entry.rule_channel_id = await get_bot_config('rules_channel_id')
+            await sync_to_async(invite_entry.save)()
+            marked_pending = True
+            print(f"Invite {used_code} marcado como PENDING_VERIFICATION para miembro {member.name}.")
+        except Invite.DoesNotExist:
+            def _process_shared():
+                now = timezone.now()
+                with transaction.atomic():
+                    try:
+                        link = SharedInviteLink.objects.select_for_update().get(invite_code=str(used_code))
+                    except SharedInviteLink.DoesNotExist:
+                        return False
+
+                    if not link.is_active:
+                        return False
+                    if link.expires_at and now >= link.expires_at:
+                        return False
+                    if link.uses >= link.max_uses:
+                        return False
+
+                    redemption, created = SharedInviteRedemption.objects.get_or_create(
+                        link=link,
+                        member_id=str(member.id),
+                        defaults={'status': 'PENDING_VERIFICATION'}
+                    )
+
+                    if created:
+                        link.uses = int(link.uses) + 1
+                        link.last_used_at = now
+                        link.save(update_fields=['uses', 'last_used_at', 'updated_at'])
+                    else:
+                        if redemption.status != 'PENDING_VERIFICATION':
+                            redemption.status = 'PENDING_VERIFICATION'
+                            redemption.used_at = None
+                            redemption.save(update_fields=['status', 'used_at'])
+                    return True
+
+            marked_pending = await sync_to_async(_process_shared)()
+
+        if not marked_pending:
+            print(f"Invite {used_code} no encontrado o no válido en la base de datos de Django.")
+            return
         
         # Enviar mensaje de bienvenida personalizado en el canal de bienvenida
         welcome_channel_id = await get_bot_config('welcome_channel_id')
@@ -639,8 +729,6 @@ async def on_member_join(member):
         else:
             print("welcome_channel_id no está configurado en la base de datos.")
 
-    except Invite.DoesNotExist:
-        print(f"Invite {used_code} no encontrado en la base de datos de Django.")
     except Exception as e:
         print(f"Error al procesar la unión de miembro para {member.name} con invite {used_code}: {e}")
 

@@ -2,8 +2,6 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from uuid import uuid4
 
-# Create your models here.
-
 class Invite(models.Model):
     INVITE_STATUS_CHOICES = [
         ('PENDING', 'Pendiente'),
@@ -197,4 +195,52 @@ class HotmartTransaction(models.Model):
         indexes = [
             models.Index(fields=['email', 'processed']),
             models.Index(fields=['event_type', 'created_at']),
+        ]
+
+
+class SharedInviteLink(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    invite_code = models.CharField(max_length=20, unique=True, db_index=True)
+    role_id = models.CharField(max_length=100, db_index=True)
+    name = models.CharField(max_length=255, blank=True)
+    max_uses = models.PositiveIntegerField(default=1)
+    uses = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        status = "✅" if self.is_active else "❌"
+        return f"{status} {self.name or self.invite_code} (rol {self.role_id}) {self.uses}/{self.max_uses}"
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Link Compartido"
+        verbose_name_plural = "Links Compartidos"
+
+
+class SharedInviteRedemption(models.Model):
+    REDEMPTION_STATUS_CHOICES = [
+        ('PENDING_VERIFICATION', 'Pendiente de Verificación'),
+        ('USED', 'Usado'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    link = models.ForeignKey(SharedInviteLink, on_delete=models.CASCADE, related_name='redemptions')
+    member_id = models.CharField(max_length=100, db_index=True)
+    status = models.CharField(max_length=25, choices=REDEMPTION_STATUS_CHOICES, default='PENDING_VERIFICATION')
+    created_at = models.DateTimeField(auto_now_add=True)
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.member_id} - {self.link.invite_code} ({self.status})"
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Redención de Link Compartido"
+        verbose_name_plural = "Redenciones de Links Compartidos"
+        constraints = [
+            models.UniqueConstraint(fields=['link', 'member_id'], name='uniq_shared_invite_link_member')
         ]

@@ -1,7 +1,8 @@
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-from .models import Invite, BotConfiguration, HotmartProduct, HotmartSubscription, HotmartTransaction
+from django.db import transaction
+from .models import Invite, BotConfiguration, HotmartProduct, HotmartSubscription, HotmartTransaction, SharedInviteLink, SharedInviteRedemption
 from datetime import datetime, timedelta
 import os
 import json
@@ -20,7 +21,9 @@ def get_bot_config(name, default=None):
     """
     try:
         config = BotConfiguration.objects.filter(name=name, is_active=True).first()
-        return config.value if config else default
+        if config:
+            return config.value
+        return default
     except Exception as e:
         print(f"Error al obtener configuración '{name}': {e}")
         return default
@@ -36,6 +39,48 @@ def get_bot_config_int(name, default=None):
     except (ValueError, TypeError):
         print(f"Error al convertir configuración '{name}' a entero: {value}")
         return default
+
+
+def _require_api_key(request):
+    api_key = get_bot_config('invitation_roles_api_key', '')
+    if not api_key:
+        return None
+    provided = request.headers.get('X-API-Key')
+    if provided == api_key:
+        return None
+    return JsonResponse({'error': 'No autorizado'}, status=401)
+
+
+def _parse_json_body(request):
+    try:
+        return json.loads(request.body or b'{}')
+    except json.JSONDecodeError:
+        return None
+
+
+def _serialize_shared_link(link):
+    now = timezone.now()
+    expires_at = link.expires_at
+    is_expired = bool(expires_at and now >= expires_at)
+    remaining = int(link.max_uses) - int(link.uses)
+    if remaining < 0:
+        remaining = 0
+    return {
+        'id': str(link.id),
+        'inviteCode': link.invite_code,
+        'inviteUrl': f"https://discord.gg/{link.invite_code}",
+        'name': link.name,
+        'roleId': link.role_id,
+        'maxUses': link.max_uses,
+        'uses': link.uses,
+        'remainingUses': remaining,
+        'isActive': link.is_active,
+        'isExpired': is_expired,
+        'expiresAt': link.expires_at.isoformat() if link.expires_at else None,
+        'lastUsedAt': link.last_used_at.isoformat() if link.last_used_at else None,
+        'createdAt': link.created_at.isoformat(),
+        'updatedAt': link.updated_at.isoformat(),
+    }
 
 
 def send_email_message(to_email, subject, html_body, plain_body):
@@ -76,6 +121,150 @@ def _get_discord_auth_headers():
         "Authorization": f"Bot {token}",
         "Content-Type": "application/json",
     }
+
+
+@csrf_exempt
+def shared_invites_api(request):
+    auth_error = _require_api_key(request)
+    if auth_error:
+        return auth_error
+
+    if request.method == 'GET':
+        links = SharedInviteLink.objects.all().order_by('-created_at')
+        return JsonResponse({'items': [_serialize_shared_link(link) for link in links]}, status=200)
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+    data = _parse_json_body(request)
+    if data is None:
+        return JsonResponse({'error': 'Payload JSON inválido.'}, status=400)
+
+    role_id = data.get('roleId')
+    max_uses = data.get('maxUses')
+    ttl_seconds = data.get('ttlSeconds')
+    name = data.get('name', '')
+
+    if not role_id:
+        return JsonResponse({'error': 'roleId es requerido.'}, status=400)
+
+    try:
+        max_uses_int = int(max_uses)
+    except (TypeError, ValueError):
+        return JsonResponse({'error': 'maxUses debe ser un entero.'}, status=400)
+
+    if max_uses_int <= 0:
+        return JsonResponse({'error': 'maxUses debe ser mayor que 0.'}, status=400)
+
+    invite_ttl_seconds = get_bot_config_int('invite_ttl_seconds', 604800)
+    if ttl_seconds is not None:
+        try:
+            invite_ttl_seconds = int(ttl_seconds)
+        except (TypeError, ValueError):
+            return JsonResponse({'error': 'ttlSeconds debe ser un entero.'}, status=400)
+
+    welcome_channel_id = get_bot_config('welcome_channel_id')
+    discord_bot_token = os.environ.get('DISCORD_BOT_TOKEN')
+
+    if not welcome_channel_id or not discord_bot_token:
+        return JsonResponse({'error': 'Faltan configuraciones de Discord (welcome_channel_id en BD) o DISCORD_BOT_TOKEN en variables de entorno.'}, status=500)
+
+    discord_api_url = f"{DISCORD_API_BASE_URL}/channels/{welcome_channel_id}/invites"
+    headers = {
+        "Authorization": f"Bot {discord_bot_token}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "max_uses": max_uses_int,
+        "max_age": invite_ttl_seconds,
+        "unique": True,
+        "temporary": False,
+        "reason": f"Shared invite (rol {role_id})",
+    }
+
+    try:
+        response = requests.post(discord_api_url, headers=headers, json=payload, timeout=10)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as http_error:
+        print(f"Error HTTP al crear invite compartido: {http_error}")
+        return JsonResponse({'error': 'Error al interactuar con la API de Discord.', 'details': str(http_error)}, status=500)
+
+    invite_data = response.json()
+    invite_code = invite_data.get('code')
+    if not invite_code:
+        return JsonResponse({'error': 'Discord no devolvió un invite_code válido.'}, status=500)
+
+    expires_at = None
+    if invite_ttl_seconds and invite_ttl_seconds > 0:
+        expires_at = timezone.now() + timedelta(seconds=invite_ttl_seconds)
+
+    link = SharedInviteLink.objects.create(
+        invite_code=str(invite_code),
+        role_id=str(role_id),
+        name=str(name or ''),
+        max_uses=max_uses_int,
+        expires_at=expires_at,
+        is_active=True,
+    )
+
+    return JsonResponse({'item': _serialize_shared_link(link)}, status=201)
+
+
+@csrf_exempt
+def shared_invite_detail_api(request, link_id):
+    auth_error = _require_api_key(request)
+    if auth_error:
+        return auth_error
+
+    try:
+        link = SharedInviteLink.objects.get(id=link_id)
+    except SharedInviteLink.DoesNotExist:
+        return JsonResponse({'error': 'No encontrado'}, status=404)
+
+    if request.method == 'GET':
+        return JsonResponse({'item': _serialize_shared_link(link)}, status=200)
+
+    if request.method in ('PUT', 'PATCH'):
+        data = _parse_json_body(request)
+        if data is None:
+            return JsonResponse({'error': 'Payload JSON inválido.'}, status=400)
+
+        if 'name' in data:
+            link.name = str(data.get('name') or '')
+
+        if 'isActive' in data:
+            link.is_active = bool(data.get('isActive'))
+
+        if 'maxUses' in data:
+            try:
+                new_max = int(data.get('maxUses'))
+            except (TypeError, ValueError):
+                return JsonResponse({'error': 'maxUses debe ser un entero.'}, status=400)
+            if new_max <= 0:
+                return JsonResponse({'error': 'maxUses debe ser mayor que 0.'}, status=400)
+            if new_max < link.uses:
+                return JsonResponse({'error': 'maxUses no puede ser menor que uses.'}, status=400)
+            link.max_uses = new_max
+
+        if 'expiresAt' in data:
+            raw = data.get('expiresAt')
+            if raw:
+                try:
+                    link.expires_at = datetime.fromisoformat(raw.replace('Z', '+00:00'))
+                except Exception:
+                    return JsonResponse({'error': 'expiresAt debe ser ISO8601.'}, status=400)
+            else:
+                link.expires_at = None
+
+        link.save()
+        return JsonResponse({'item': _serialize_shared_link(link)}, status=200)
+
+    if request.method == 'DELETE':
+        link.is_active = False
+        link.save(update_fields=['is_active', 'updated_at'])
+        return JsonResponse({'item': _serialize_shared_link(link)}, status=200)
+
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 
 def _discord_put_role(guild_id: str, member_id: str, role_id: str) -> bool:

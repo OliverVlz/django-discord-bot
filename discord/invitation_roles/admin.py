@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Invite, AccessRole, BotConfiguration, HotmartProduct, HotmartSubscription, HotmartTransaction
+from .models import Invite, AccessRole, BotConfiguration, HotmartProduct, HotmartSubscription, HotmartTransaction, SharedInviteLink, SharedInviteRedemption
 
 @admin.register(Invite)
 class InviteAdmin(admin.ModelAdmin):
@@ -146,3 +146,20 @@ class HotmartTransactionAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('subscription', 'product')
+
+
+@admin.register(SharedInviteLink)
+class SharedInviteLinkAdmin(admin.ModelAdmin):
+    list_display = ('name', 'invite_code', 'role_id', 'is_active', 'uses', 'max_uses', 'expires_at', 'last_used_at', 'created_at')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('name', 'invite_code', 'role_id')
+    readonly_fields = ('id', 'invite_code', 'uses', 'last_used_at', 'created_at', 'updated_at')
+    list_editable = ('is_active',)
+
+
+@admin.register(SharedInviteRedemption)
+class SharedInviteRedemptionAdmin(admin.ModelAdmin):
+    list_display = ('member_id', 'link', 'status', 'created_at', 'used_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('member_id', 'link__invite_code', 'link__name')
+    readonly_fields = ('id', 'created_at', 'used_at')
