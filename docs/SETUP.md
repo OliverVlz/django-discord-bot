@@ -241,6 +241,71 @@ Crear estas configuraciones:
 | `rules_channel_id`        | `1234567890` | channel | Canal de reglas             |
 | `default_chatbot_role_id` | `1234567890` | general | Rol por defecto del chatbot |
 
+### 3.1 API de invitaciones (opcional)
+
+Estos endpoints viven bajo el prefijo `/invitation_roles/`.
+
+#### A) Crear invitación compartida por rol
+
+**POST** `/invitation_roles/shared-invites/`
+
+**Headers:**
+
+- `Content-Type: application/json`
+- `X-API-Key: <api_key>` (solo si configuraste `invitation_roles_api_key` en **Invitation Roles → Bot Configurations**)
+
+**Body (JSON):**
+
+- `roleId` (requerido): ID del rol de Discord.
+- `maxUses` (requerido, entero): cantidad máxima de usos.
+  - `0` = sin límite de usos (ilimitado).
+  - `1` a `100` = límite de usos.
+  - Valores mayores a `100` suelen ser rechazados por la API de Discord.
+- `ttlSeconds` (opcional, entero): tiempo de vida en segundos.
+  - 1 día: `86400`
+  - 7 días (máximo en Discord): `604800`
+  - `0` = sin expiración (Discord lo maneja como `max_age = 0`).
+- `name` (opcional): nombre descriptivo.
+
+Ejemplo (7 días):
+
+```json
+{
+  "roleId": "123456789012345678",
+  "maxUses": 25,
+  "ttlSeconds": 604800,
+  "name": "Invitación 7 días"
+}
+```
+
+Ejemplo (sin expiración y sin límite de usos):
+
+```json
+{
+  "roleId": "123456789012345678",
+  "maxUses": 0,
+  "ttlSeconds": 0,
+  "name": "Invitación sin expiración"
+}
+```
+
+Respuesta: `201` con un objeto `item` que incluye `inviteUrl`, `inviteCode`, `remainingUses`, `expiresAt`, etc.
+
+#### B) Crear invitación de 1 uso para un email (envía correo)
+
+**POST** `/invitation_roles/generate-invite/`
+
+**Body (JSON):**
+
+```json
+{
+  "email": "persona@ejemplo.com",
+  "roleId": "123456789012345678"
+}
+```
+
+Respuesta: `200` con `inviteUrl` (y envía el correo si Gmail está configurado).
+
 ### 4. Configurar Roles del Chatbot
 
 Ir a: **Chatbot AI → Chatbot Roles → Add**

@@ -459,3 +459,4 @@ ChatbotUsage.objects.filter(date=timezone.now().date())
 **Última actualización**: Enero 2025  
 **Versión**: 2.0.0  
 **Compatibilidad**: Discord.py 2.6+, Django 5.2+, PostgreSQL 16+ con pgvector
+
