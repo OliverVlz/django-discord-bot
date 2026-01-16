@@ -6,6 +6,12 @@ from asgiref.sync import sync_to_async
 from .chatbot_service import chatbot_service
 from .models import ChatbotSession, ChatbotRole, ChatbotTraining
 
+
+DM_PERMISSION_STEPS = (
+    "Ajustes de usuario → Contenido de usuario → Permisos de interacción → "
+    "Mensajes directos (DMs): permite DMs de miembros del servidor (o de este servidor)."
+)
+
 class StartChatbotView(View):
     """Vista con botón para iniciar chat con IA"""
     
@@ -74,7 +80,13 @@ class StartChatbotView(View):
                 await interaction.followup.send("✅ ¡Chat iniciado! Revisa tus mensajes privados (DMs).", ephemeral=True)
                 
             except discord.Forbidden:
-                await interaction.followup.send("❌ No puedo enviarte mensajes privados. Por favor, habilita los DMs del bot en Discord y vuelve a intentar.", ephemeral=True)
+                await interaction.followup.send(
+                    "❌ No puedo enviarte mensajes privados (DMs).\n\n"
+                    "Para habilitarlos en Discord:\n"
+                    f"• {DM_PERMISSION_STEPS}\n\n"
+                    "Luego vuelve a intentar.",
+                    ephemeral=True,
+                )
             except Exception as e:
                 print(f"Error iniciando chat por DM: {e}")
                 await interaction.followup.send("❌ Error al iniciar el chat. Por favor, inténtalo de nuevo.", ephemeral=True)
@@ -260,7 +272,12 @@ class ChatbotCog(commands.Cog):
                     
             except discord.Forbidden:
                 # Si no se pueden enviar DMs, enviar en el canal
-                await processing_msg.edit(content="⚠️ No puedo enviarte DMs. Habilitando respuestas públicas temporalmente.")
+                await processing_msg.edit(
+                    content=(
+                        "⚠️ No puedo enviarte mensajes privados (DMs). Respondiendo aquí temporalmente.\n"
+                        f"Para habilitarlos: {DM_PERMISSION_STEPS}"
+                    )
+                )
                 embed = discord.Embed(
                     title="🤖 Asistente IA",
                     description=ai_response,
@@ -277,7 +294,12 @@ class ChatbotCog(commands.Cog):
                     await message.add_reaction("❌")
             except Exception as e:
                 print(f"Error enviando DM: {e}")
-                await processing_msg.edit(content="❌ Error enviando respuesta. Por favor, habilita DMs del bot e inténtalo de nuevo.")
+                await processing_msg.edit(
+                    content=(
+                        "❌ Error enviando respuesta por DM.\n"
+                        f"Si tienes los DMs bloqueados: {DM_PERMISSION_STEPS}"
+                    )
+                )
             
             # Enviar mensaje de bienvenida si es la primera vez del usuario en este canal
             await self._send_welcome_message_if_needed(message, session)
